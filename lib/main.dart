@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:swipe_clean_gallery/screens/gallery_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
+import 'package:swipe_clean_gallery/screens/splash_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 
 void main() {
@@ -22,8 +23,33 @@ class MyApp extends StatelessWidget {
           seedColor: AppColors.backgroundSurface,
         ),
       ),
-      home: MainScreen(),
+      home: const SplashWrapper(),
     );
+  }
+}
+
+class SplashWrapper extends StatefulWidget {
+  const SplashWrapper({super.key});
+
+  @override
+  State<SplashWrapper> createState() => _SplashWrapperState();
+}
+
+class _SplashWrapperState extends State<SplashWrapper> {
+  bool _showSplash = true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash) {
+      return SplashScreen(
+        onComplete: () {
+          setState(() {
+            _showSplash = false;
+          });
+        },
+      );
+    }
+    return const MainScreen();
   }
 }
 
@@ -44,7 +70,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _checkPermission() async {
-    // Check spermission state
     final PermissionState ps = await PhotoManager.requestPermissionExtend();
     setState(() {
       hasPermission = ps.isAuth || ps == PermissionState.limited;

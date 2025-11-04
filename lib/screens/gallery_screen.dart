@@ -114,7 +114,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
       ),
       body: groupedImages.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : ListView.builder(
               controller: _scrollController,
               itemCount: sectionKeys.length + (_isLoading ? 1 : 0),
@@ -164,8 +164,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       final globalIndex = allImages.indexOf(asset);
 
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final updateList = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => ImageViewerScreen(
@@ -174,6 +174,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               ),
                             ),
                           );
+                          if (updateList != null && mounted) {
+                            setState(() {
+                              groupedImages.clear();
+                              _currentPage = 0;
+                              _hasMore = true;
+                            });
+                            await _initGallery();
+                          }
                         },
                         child: Hero(
                           tag: asset.id,

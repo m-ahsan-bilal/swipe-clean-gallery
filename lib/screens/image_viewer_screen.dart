@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:swipe_clean_gallery/services/image_viewer_service.dart';
 
 class ImageViewerScreen extends StatefulWidget {
   final List<AssetEntity> images;
@@ -19,13 +20,12 @@ class ImageViewerScreen extends StatefulWidget {
 class _ImageViewerScreenState extends State<ImageViewerScreen>
     with SingleTickerProviderStateMixin {
   late PageController _pageController;
+  late ImageViewerService _service;
+  late AnimationController _animationController;
+
   int currentIndex = 0;
   double _dragOffset = 0.0;
   bool _isDeleting = false;
-  bool _isLoading = false;
-  late AnimationController _animationController;
-  final Map<String, Future<Uint8List?>> _imageCache = {};
-
   bool _isDisposed = false;
 
   @override
@@ -33,6 +33,13 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
     super.initState();
     currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: currentIndex);
+
+    _service = ImageViewerService(
+      widget.images,
+      onUpdate: () {
+        if (!_isDisposed && mounted) setState(() {});
+      },
+    );
 
     _animationController = AnimationController(
       vsync: this,
@@ -42,74 +49,64 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
 
   @override
   void dispose() {
-    _isDisposed = true; // 👈 mark disposed early
+    _isDisposed = true;
     _pageController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
   Future<void> _deletePhoto() async {
-    final asset = widget.images[currentIndex];
     if (_isDisposed) return;
 
-    setState(() => _isLoading = true);
-    final deletedIds = await PhotoManager.editor.deleteWithIds([asset.id]);
-    final success = deletedIds.contains(asset.id);
+    final success = await _service.deletePhoto(context, currentIndex);
 
-    if (_isDisposed) return; // 👈 check again after async
+    if (_isDisposed) return;
 
     if (success) {
-      await PhotoManager.clearFileCache();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Photo deleted"),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(milliseconds: 800),
-        ),
-      );
-
-      setState(() {
-        widget.images.removeAt(currentIndex);
-        _imageCache.remove(asset.id);
-      });
-
-      if (widget.images.isEmpty) {
-        _safePop();
+      if (_service.images.isEmpty) {
+        // All images deleted, return count and exit
+        Navigator.of(context).pop(_service.getDeletedCount());
         return;
       }
 
-      if (currentIndex >= widget.images.length) {
-        currentIndex = widget.images.length - 1;
+      if (currentIndex >= _service.images.length) {
+        currentIndex = _service.images.length - 1;
       }
 
       if (!_isDisposed && _pageController.hasClients) {
         _pageController.jumpToPage(currentIndex);
       }
-    } else {
-      if (!_isDisposed) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Failed to delete photo")));
-      }
-    }
-
-    if (!_isDisposed) {
-      setState(() => _isLoading = false);
     }
   }
 
+  /// Exit screen safely with deleted count
   void _safePop() {
-    if (Navigator.canPop(context) && !_isDisposed) {
-      Navigator.of(context).pop(widget.images);
+    if (!_isDisposed && Navigator.canPop(context)) {
+      final count = _service.getDeletedCount();
+      debugPrint("🔙 Exiting viewer with deleted count: $count");
+      Navigator.of(context).pop(count);
     }
   }
 
   Future<Uint8List?> _getImageBytes(AssetEntity asset) {
-    return _imageCache.putIfAbsent(asset.id, () => asset.originBytes);
+    return _service.getImageBytes(asset);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_service.images.isEmpty) {
+      // All images deleted
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed && mounted) {
+          Navigator.of(context).pop(_service.getDeletedCount());
+        }
+      });
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -117,12 +114,11 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
           GestureDetector(
             onVerticalDragUpdate: (details) {
               if (_isDisposed) return;
-              setState(() {
-                _dragOffset += details.primaryDelta!;
-              });
+              setState(() => _dragOffset += details.primaryDelta!);
             },
             onVerticalDragEnd: (details) async {
               if (_isDisposed) return;
+
               if (_dragOffset < -120 && !_isDeleting) {
                 setState(() => _isDeleting = true);
                 await _animationController.forward();
@@ -144,13 +140,12 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
               controller: _pageController,
               physics: const BouncingScrollPhysics(),
               onPageChanged: (index) {
-                if (!_isDisposed) {
-                  setState(() => currentIndex = index);
-                }
+                if (!_isDisposed) setState(() => currentIndex = index);
               },
-              itemCount: widget.images.length,
+              itemCount: _service.images.length,
               itemBuilder: (context, index) {
-                final asset = widget.images[index];
+                final asset = _service.images[index];
+
                 return FutureBuilder<Uint8List?>(
                   future: _getImageBytes(asset),
                   builder: (context, snapshot) {
@@ -202,7 +197,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
             ),
           ),
 
-          // top bar
+          // Top bar
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 8,
@@ -219,7 +214,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
                   onPressed: _safePop,
                 ),
                 Text(
-                  "${currentIndex + 1}/${widget.images.length}",
+                  "${currentIndex + 1}/${_service.images.length}",
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
@@ -231,13 +226,42 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
             ),
           ),
 
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.35),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 3,
+          // Swipe hint
+          if (_dragOffset.abs() > 30)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 80,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _dragOffset < 0
+                        ? Colors.red.withOpacity(0.8)
+                        : Colors.blue.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _dragOffset < 0 ? Icons.delete : Icons.arrow_back,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _dragOffset < 0 ? "Swipe to Delete" : "Swipe to Exit",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

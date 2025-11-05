@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:swipe_clean_gallery/screens/gallery_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/screens/splash_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
   runApp(const MyApp());
 }
 

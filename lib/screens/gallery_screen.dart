@@ -168,7 +168,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     "$deletedCount file${deletedCount > 1 ? 's' : ''} successfully deleted",
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontSize: 20,
+                     // fontSize: 20,
                       fontWeight: FontWeight.normal,
                     ),
                   ),

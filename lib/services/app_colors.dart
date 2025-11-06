@@ -14,6 +14,8 @@ class AppColors {
   static const Color textSecondary = Color(0xFF8E8E93);
   static const Color textTertiary = Color(0xFF636366);
   static const Color textDisabled = Color(0xFF48484A);
+  static const Color brandPrimary = Color.fromARGB(255, 46, 104, 228);
+  static const Color dialogBackground = Color(0xFF1A1F24);
   //light colors
   static const Color backgroundLight = Color(0xFFFFFFFF);
   static const Color surfaceLight = Color(0xFFF2F2F7);

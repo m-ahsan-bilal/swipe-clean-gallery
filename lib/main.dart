@@ -1,16 +1,18 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:swipe_clean_gallery/screens/gallery_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
-import 'package:swipe_clean_gallery/screens/splash_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize the Mobile Ads SDK
   await MobileAds.instance.initialize();
+
+  // 👇 Add your device as a test device
+  RequestConfiguration configuration = RequestConfiguration(
+    testDeviceIds: ['E4AFC181484798EFEE831B49363CA387'], // <-- your ID
+  );
+  MobileAds.instance.updateRequestConfiguration(configuration);
   runApp(const MyApp());
 }
 
@@ -23,76 +25,53 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Swipe Clean Gallery',
       theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: AppColors.backgroundPrimary,
+        canvasColor: AppColors.backgroundPrimary,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.backgroundSurface,
+          seedColor: AppColors.brandPrimary,
+          brightness: Brightness.dark,
+          primary: AppColors.brandPrimary,
+          surface: AppColors.backgroundSurface,
+          background: AppColors.backgroundPrimary,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.backgroundPrimary,
+          elevation: 0,
+          foregroundColor: AppColors.textPrimary,
+        ),
+        dialogTheme: const DialogThemeData(
+          backgroundColor: AppColors.dialogBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          titleTextStyle: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+          contentTextStyle: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.brandPrimary,
+            foregroundColor: AppColors.textPrimary,
+            shape: const StadiumBorder(),
+          ),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: AppColors.backgroundSurface,
+          contentTextStyle: TextStyle(color: AppColors.textPrimary),
+          behavior: SnackBarBehavior.floating,
         ),
       ),
-      home: const SplashWrapper(),
+      home: const PermissionScreen(),
     );
-  }
-}
-
-class SplashWrapper extends StatefulWidget {
-  const SplashWrapper({super.key});
-
-  @override
-  State<SplashWrapper> createState() => _SplashWrapperState();
-}
-
-class _SplashWrapperState extends State<SplashWrapper> {
-  bool _showSplash = true;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_showSplash) {
-      return SplashScreen(
-        onComplete: () {
-          setState(() {
-            _showSplash = false;
-          });
-        },
-      );
-    }
-    return const MainScreen();
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  bool? hasPermission;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkPermission();
-  }
-
-  Future<void> _checkPermission() async {
-    final PermissionState ps = await PhotoManager.requestPermissionExtend();
-    setState(() {
-      hasPermission = ps.isAuth || ps == PermissionState.limited;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (hasPermission == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.backgroundSurface,
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (hasPermission == true) {
-      return const GalleryScreen();
-    } else {
-      return const PermissionScreen();
-    }
   }
 }

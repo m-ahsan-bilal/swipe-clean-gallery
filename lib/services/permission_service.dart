@@ -9,13 +9,39 @@ class PermissionService {
 
     if (result.isAuth) {
       _navigateToGallery(context);
-    } else if (result == PermissionState.limited) {
-      // Limited access to a subset of photos
-      await PhotoManager.presentLimited();
-      _navigateToGallery(context);
-    } else {
-      _showPermissionDeniedMessage(context);
+      return;
     }
+
+    if (result == PermissionState.limited) {
+      // We don't allow limited access: ask user to grant full access in Settings
+      if (context.mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Full Access Needed'),
+            content: const Text(
+              'Please grant full photo access to browse and clean your gallery.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await PhotoManager.openSetting();
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    _showPermissionDeniedMessage(context);
   }
 
   /// Navigates to GalleryScreen after permission is granted
@@ -29,9 +55,15 @@ class PermissionService {
   /// Shows snackbar when permission is denied
   static void _showPermissionDeniedMessage(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Permission is needed to browse photos. Please allow access in Settings.",
+      SnackBar(
+        content: const Text(
+          "Permission needed to browse photos. Please allow in Settings.",
+        ),
+        action: SnackBarAction(
+          label: 'Open Settings',
+          onPressed: () {
+            PhotoManager.openSetting();
+          },
         ),
       ),
     );
@@ -40,6 +72,7 @@ class PermissionService {
   /// Checks if permission is already granted
   static Future<bool> hasPermission() async {
     final PermissionState state = await PhotoManager.requestPermissionExtend();
-    return state.isAuth || state == PermissionState.limited;
+    // Only full access qualifies
+    return state.isAuth;
   }
 }

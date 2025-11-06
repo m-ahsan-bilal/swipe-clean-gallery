@@ -1,9 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    
+    <!-- Permissions for Android 13+ (API 33+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    
+    <!-- Permissions for Android 10-12 (API 29-32) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    
+    <!-- Permissions for Android 9 and below (API 28 and below) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    
+    <!-- Optional: For managing all files (use carefully) -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
+    
+    <!-- Internet for ads -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
@@ -11,6 +22,7 @@
         android:label="Swipe Clean Gallery"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
 
         <activity

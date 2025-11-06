@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -8,13 +7,41 @@ class ImageViewerService {
   final Map<String, Future<Uint8List?>> _imageCache = {};
   int deletedCount = 0;
 
-  /// Optional callback for UI updates
   VoidCallback? onUpdate;
 
   ImageViewerService(this.images, {this.onUpdate});
 
-  Future<Uint8List?> getImageBytes(AssetEntity asset) {
-    return _imageCache.putIfAbsent(asset.id, () => asset.originBytes);
+  /// Get thumbnail bytes for both images and videos
+  Future<Uint8List?> getThumbnailBytes(AssetEntity asset) {
+    return _imageCache.putIfAbsent(asset.id, () async {
+      try {
+        // For videos, use thumbnail. For images, use original or high quality
+        if (asset.type == AssetType.video) {
+          // Get video thumbnail
+          final thumb = await asset.thumbnailDataWithSize(
+            const ThumbnailSize(1920, 1920),
+            quality: 95,
+          );
+          return thumb;
+        } else {
+          // For images, try to get original bytes, fall back to thumbnail
+          try {
+            final original = await asset.originBytes;
+            return original;
+          } catch (e) {
+            debugPrint("⚠️ Failed to get original bytes, using thumbnail: $e");
+            final thumb = await asset.thumbnailDataWithSize(
+              const ThumbnailSize(1920, 1920),
+              quality: 95,
+            );
+            return thumb;
+          }
+        }
+      } catch (e) {
+        debugPrint("❌ Error loading asset ${asset.id}: $e");
+        return null;
+      }
+    });
   }
 
   Future<bool> deletePhoto(BuildContext context, int currentIndex) async {
@@ -31,13 +58,14 @@ class ImageViewerService {
         _imageCache.remove(asset.id);
         deletedCount++;
 
-        // Notify UI to refresh
         if (onUpdate != null) onUpdate!();
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Photo deleted ($deletedCount deleted total)"),
+              content: Text(
+                "${asset.type == AssetType.video ? 'Video' : 'Photo'} deleted ($deletedCount deleted total)",
+              ),
               behavior: SnackBarBehavior.floating,
               duration: const Duration(milliseconds: 800),
             ),
@@ -49,7 +77,9 @@ class ImageViewerService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error deleting photo: $e"),
+            content: Text(
+              "Error deleting ${asset.type == AssetType.video ? 'video' : 'photo'}: $e",
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );

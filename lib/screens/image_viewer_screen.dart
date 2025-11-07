@@ -20,16 +20,18 @@ class ImageViewerScreen extends StatefulWidget {
 }
 
 class _ImageViewerScreenState extends State<ImageViewerScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late PageController _pageController;
   late ImageViewerService _service;
   late AnimationController _animationController;
+  late AnimationController _uiController;
 
   int currentIndex = 0;
   double _dragOffset = 0.0;
   bool _isDeleting = false;
   bool _isDisposed = false;
   bool _hasPopped = false;
+  bool _isDraggingHorizontal = false;
   final Map<String, VideoPlayerController> _videoControllers = {};
   String? _activeVideoId;
   bool _isOpeningVideo = false;
@@ -49,7 +51,13 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _uiController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: 1.0,
     );
   }
 
@@ -58,6 +66,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
     _isDisposed = true;
     _pageController.dispose();
     _animationController.dispose();
+    _uiController.dispose();
     for (final c in _videoControllers.values) {
       c.dispose();
     }
@@ -188,11 +197,11 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
           children: [
             GestureDetector(
               onVerticalDragUpdate: (details) {
-                if (_isDisposed) return;
+                if (_isDisposed || _isDraggingHorizontal) return;
                 setState(() => _dragOffset += details.primaryDelta!);
               },
               onVerticalDragEnd: (details) async {
-                if (_isDisposed) return;
+                if (_isDisposed || _isDraggingHorizontal) return;
 
                 if (_dragOffset < -120 && !_isDeleting) {
                   setState(() => _isDeleting = true);
@@ -211,176 +220,256 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
                   setState(() => _dragOffset = 0);
                 }
               },
-              child: PageView.builder(
-                controller: _pageController,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) {
-                  if (!_isDisposed) setState(() => currentIndex = index);
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  // Track horizontal scrolling
+                  if (notification is ScrollStartNotification) {
+                    setState(() => _isDraggingHorizontal = true);
+                  } else if (notification is ScrollEndNotification) {
+                    setState(() => _isDraggingHorizontal = false);
+                  }
+                  return false;
                 },
-                itemCount: _service.images.length,
-                itemBuilder: (context, index) {
-                  final asset = _service.images[index];
-
-                  return FutureBuilder<Uint8List?>(
-                    future: _getThumbnailBytes(asset),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        );
+                child: Container(
+                  margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 70,
+                    bottom: 20,
+                  ),
+                  child: PageView.builder(
+                  controller: _pageController,
+                  physics: const ClampingScrollPhysics(),
+                  onPageChanged: (index) {
+                    if (!_isDisposed) {
+                      setState(() => currentIndex = index);
+                      // Close any playing video when changing pages
+                      if (_activeVideoId != null) {
+                        _closeVideo();
                       }
+                    }
+                  },
+                  itemCount: _service.images.length,
+                    itemBuilder: (context, index) {
+                    final asset = _service.images[index];
 
-                      final opacity =
-                          1.0 - (_dragOffset.abs() / 300).clamp(0.0, 1.0);
-                      final translateY = _dragOffset.clamp(-200, 200);
+                    return FutureBuilder<Uint8List?>(
+                      future: _getThumbnailBytes(asset),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(color: Colors.white),
+                          );
+                        }
 
-                      return AnimatedBuilder(
-                        animation: _animationController,
-                        builder: (context, child) {
-                          final animationY = -200 * _animationController.value;
-                          final animationOpacity =
-                              1.0 - _animationController.value;
+                        final opacity =
+                            1.0 - (_dragOffset.abs() / 300).clamp(0.0, 1.0);
+                        final translateY = _dragOffset.clamp(-200, 200);
 
-                          return Opacity(
-                            opacity: _isDeleting ? animationOpacity : opacity,
-                            child: Transform.translate(
-                              offset: Offset(
-                                0,
-                                (_isDeleting ? animationY : translateY)
-                                    .toDouble(),
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Hero(
-                                    tag: asset.id,
-                                    child: Image.memory(
-                                      snapshot.data!,
-                                      fit: BoxFit.contain,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
-                                  ),
-                                  // Video play button overlay
-                                  if (asset.type == AssetType.video)
-                                    GestureDetector(
-                                      onTap: () => _openVideo(asset),
-                                      child: Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.play_arrow,
-                                          color: Colors.white,
-                                          size: 48,
-                                        ),
+                        return AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            final animationY = -200 * _animationController.value;
+                            final animationOpacity =
+                                1.0 - _animationController.value;
+
+                            return Opacity(
+                              opacity: _isDeleting ? animationOpacity : opacity,
+                              child: Transform.translate(
+                                offset: Offset(
+                                  0,
+                                  (_isDeleting ? animationY : translateY)
+                                      .toDouble(),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Hero(
+                                      tag: asset.id,
+                                      child: Image.memory(
+                                        snapshot.data!,
+                                        fit: BoxFit.contain,
+                                        width: double.infinity,
+                                        height: double.infinity,
                                       ),
                                     ),
-                                ],
+                                    // Video play button overlay
+                                    if (asset.type == AssetType.video)
+                                      GestureDetector(
+                                        onTap: () => _openVideo(asset),
+                                        child: Container(
+                                          width: 80,
+                                          height: 80,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.play_arrow,
+                                            color: Colors.white,
+                                            size: 48,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  ),
+                ),
               ),
             ),
 
-            // Top bar
+            // Top bar - always visible
             Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 8,
-              right: 8,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                    onPressed: _safePop,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        "${currentIndex + 1}/${_service.images.length}",
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      // Show media type indicator
-                      if (_service.images[currentIndex].type == AssetType.video)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            "VIDEO",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 8,
+                  right: 8,
+                  bottom: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.7),
+                      Colors.black.withOpacity(0.4),
+                      Colors.transparent,
                     ],
                   ),
-                  const SizedBox(width: 40),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        onPressed: _safePop,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "${currentIndex + 1}/${_service.images.length}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          // Show media type indicator
+                          if (_service.images[currentIndex].type == AssetType.video)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                "VIDEO",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
               ),
             ),
 
-            // Swipe hint
-            if (_dragOffset.abs() > 30)
+            // Swipe hint - only show during vertical drag
+            if (_dragOffset.abs() > 30 && !_isDraggingHorizontal)
               Positioned(
-                top: MediaQuery.of(context).padding.top + 80,
+                top: MediaQuery.of(context).padding.top + 100,
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _dragOffset < 0
-                          ? Colors.red.withOpacity(0.8)
-                          : Colors.blue.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _dragOffset < 0 ? Icons.delete : Icons.arrow_back,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _dragOffset < 0 ? "Swipe to Delete" : "Swipe to Exit",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                  child: TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 200),
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: 0.8 + (value * 0.2),
+                        child: Opacity(
+                          opacity: value,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _dragOffset < 0
+                                  ? Colors.red.withOpacity(0.9)
+                                  : Colors.blue.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (_dragOffset < 0 ? Colors.red : Colors.blue)
+                                      .withOpacity(0.4),
+                                  blurRadius: 15,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _dragOffset < 0 ? Icons.delete_rounded : Icons.close,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  _dragOffset < 0 ? "Release to Delete" : "Release to Exit",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),

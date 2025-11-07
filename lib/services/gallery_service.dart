@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 
 class GalleryService {
   List<AssetEntity> allImages = [];
@@ -8,10 +9,13 @@ class GalleryService {
   int currentPage = 0;
   static const int pageSize = 100;
   AssetPathEntity? _cachedAlbum;
+  final RecentlyDeletedService _deletedService;
+
+  GalleryService(this._deletedService);
 
   Future<void> initGallery() async {
     try {
-      debugPrint("🔄 Initializing gallery...");
+      debugPrint("Initializing gallery...");
 
       // Clear existing data
       allImages.clear();
@@ -19,14 +23,25 @@ class GalleryService {
       currentPage = 0;
       _cachedAlbum = null;
 
-      // Request permissions
-      final PermissionState ps = await PhotoManager.requestPermissionExtend();
+      // Reload deleted items from storage
+      await _deletedService.loadDeletedItems();
+      debugPrint("Loaded ${_deletedService.count} recently deleted items");
+
+      // Request permissions with proper Android options
+      final PermissionState ps = await PhotoManager.requestPermissionExtend(
+        requestOption: const PermissionRequestOption(
+          androidPermission: AndroidPermission(
+            type: RequestType.common,
+            mediaLocation: true,
+          ),
+        ),
+      );
       if (!ps.isAuth && ps != PermissionState.limited) {
-        debugPrint("❌ Permission denied");
+        debugPrint("Permission denied");
         return;
       }
 
-      debugPrint("✅ Permission granted");
+      debugPrint("Permission granted");
 
       // Clear any cached file references
       await PhotoManager.clearFileCache();
@@ -38,46 +53,56 @@ class GalleryService {
         hasAll: true,
       );
 
-      debugPrint("📂 Found ${albums.length} albums");
+      debugPrint("Found ${albums.length} albums");
 
       if (albums.isEmpty) {
-        debugPrint("❌ No albums found");
+        debugPrint("No albums found");
         return;
       }
 
       _cachedAlbum = albums.first;
+
+      if (_cachedAlbum == null) {
+        debugPrint("Failed to get album");
+        return;
+      }
+
       final count = await _cachedAlbum!.assetCountAsync;
-      debugPrint("📂 Using album: ${_cachedAlbum!.name} with $count items");
+      debugPrint("Using album: ${_cachedAlbum!.name} with $count items");
 
       // Load first page
       await loadMoreImages();
-      debugPrint("✅ Gallery initialized with ${allImages.length} items");
+      debugPrint("Gallery initialized with ${allImages.length} items");
     } catch (e, stackTrace) {
-      debugPrint("❌ Error initializing gallery: $e");
+      debugPrint("Error initializing gallery: $e");
       debugPrint("Stack trace: $stackTrace");
+      // Reset state on error
+      _cachedAlbum = null;
+      allImages.clear();
+      groupedImages.clear();
     }
   }
 
   Future<void> loadMoreImages() async {
     if (isLoading) {
-      debugPrint("⏳ Already loading, skipping...");
+      debugPrint("Already loading, skipping...");
       return;
     }
 
     try {
       isLoading = true;
-      debugPrint("📥 Loading more images (page $currentPage)...");
+      debugPrint("Loading more images (page $currentPage)...");
 
       // Use cached album or get fresh one
       if (_cachedAlbum == null) {
         final List<AssetPathEntity> albums =
             await PhotoManager.getAssetPathList(
-              type: RequestType.common, // 👈 Both images and videos
+              type: RequestType.common, //common type
               hasAll: true,
             );
 
         if (albums.isEmpty) {
-          debugPrint("❌ No albums found");
+          debugPrint("No albums found");
           isLoading = false;
           return;
         }
@@ -90,21 +115,34 @@ class GalleryService {
         size: pageSize,
       );
 
-      debugPrint("📥 Fetched ${newImages.length} items from page $currentPage");
+      debugPrint("Fetched ${newImages.length} items from page $currentPage");
 
       if (newImages.isNotEmpty) {
-        allImages.addAll(newImages);
-        _groupImages(newImages);
+        // Filter out deleted items
+        final deletedIds = _deletedService.getDeletedIds();
+        final filteredImages = newImages
+            .where((asset) => !deletedIds.contains(asset.id))
+            .toList();
+
+        debugPrint(
+          "🗑️ Filtered out ${newImages.length - filteredImages.length} deleted items",
+        );
+
+        if (filteredImages.isNotEmpty) {
+          allImages.addAll(filteredImages);
+          _groupImages(filteredImages);
+        }
+
         currentPage++;
         debugPrint(
-          "✅ Loaded ${newImages.length} items. Total: ${allImages.length}",
+          "Loaded ${filteredImages.length} items. Total: ${allImages.length}",
         );
-        debugPrint("📊 Grouped into ${groupedImages.length} sections");
+        debugPrint("Grouped into ${groupedImages.length} sections");
       } else {
-        debugPrint("ℹ️ No more items to load");
+        debugPrint("No more items to load");
       }
     } catch (e, stackTrace) {
-      debugPrint("❌ Error loading images: $e");
+      debugPrint(" Error loading images: $e");
       debugPrint("Stack trace: $stackTrace");
     } finally {
       isLoading = false;
@@ -112,7 +150,7 @@ class GalleryService {
   }
 
   void _groupImages(List<AssetEntity> images) {
-    debugPrint("🗂️ Grouping ${images.length} items...");
+    debugPrint("Grouping ${images.length} items...");
 
     for (var asset in images) {
       final date = asset.createDateTime;
@@ -120,13 +158,13 @@ class GalleryService {
 
       if (!groupedImages.containsKey(label)) {
         groupedImages[label] = [];
-        debugPrint("📁 Created new group: $label");
+        debugPrint("Created new group: $label");
       }
 
       groupedImages[label]!.add(asset);
     }
 
-    debugPrint("✅ Grouping complete. Total groups: ${groupedImages.length}");
+    debugPrint("Grouping complete. Total groups: ${groupedImages.length}");
   }
 
   String _formatDateLabel(DateTime date) {

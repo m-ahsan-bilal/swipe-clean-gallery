@@ -5,9 +5,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:swipe_clean_gallery/screens/image_viewer_screen.dart';
-import 'package:swipe_clean_gallery/services/ad_helper.dart';
+import 'package:swipe_clean_gallery/screens/permission_screen.dart';
+import 'package:swipe_clean_gallery/screens/recently_deleted_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/gallery_service.dart';
+import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -16,21 +18,67 @@ class GalleryScreen extends StatefulWidget {
   State<GalleryScreen> createState() => _GalleryScreenState();
 }
 
-class _GalleryScreenState extends State<GalleryScreen> {
+class _GalleryScreenState extends State<GalleryScreen>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
-  final GalleryService _galleryService = GalleryService();
+  late GalleryService _galleryService;
+  late RecentlyDeletedService _deletedService;
 
   int deletedCount = 0;
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
   bool _isInitializing = true;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
-    _initGallery();
+    WidgetsBinding.instance.addObserver(this);
+    _deletedService = RecentlyDeletedService(
+      onUpdate: () {
+        if (mounted) {
+          // Just rebuild UI, don't reinitialize gallery
+          setState(() {});
+        }
+      },
+    );
+    _galleryService = GalleryService(_deletedService);
+    _initService();
     _scrollController.addListener(_scrollListener);
     _loadBannerAd();
+  }
+
+  Future<void> _initService() async {
+    await _deletedService.init();
+    await _initGallery();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Check permissions when app resumes
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissionsOnResume();
+    }
+  }
+
+  Future<void> _checkPermissionsOnResume() async {
+    // Import the permission service at the top of the file
+    final hasPermission = await _hasAllPermissions();
+    if (!mounted) return;
+
+    if (!hasPermission) {
+      // Navigate back to permission screen if permissions were revoked
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const PermissionScreen()),
+      );
+    }
+  }
+
+  Future<bool> _hasAllPermissions() async {
+    final PermissionState photoState = await PhotoManager.getPermissionState(
+      requestOption: const PermissionRequestOption(),
+    );
+    return photoState.isAuth;
   }
 
   void _loadBannerAd() {
@@ -55,7 +103,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   Future<void> _initGallery() async {
+    // Prevent multiple simultaneous calls
+    if (_isRefreshing) {
+      debugPrint("⏭️ Already refreshing, skipping...");
+      return;
+    }
+
     try {
+      _isRefreshing = true;
       setState(() => _isInitializing = true);
 
       await _galleryService.initGallery();
@@ -74,6 +129,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
         );
       }
+    } finally {
+      _isRefreshing = false;
     }
   }
 
@@ -161,24 +218,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: Row(
-                children: [
-                  Text(
-                    "$deletedCount file${deletedCount > 1 ? 's' : ''} successfully deleted",
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 20,
-                      fontWeight: FontWeight.normal,
-                    ),
+            Row(
+              children: [
+                Text(
+                  "$deletedCount file${deletedCount > 1 ? 's' : ''} successfully deleted",
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
                   ),
-                  // const SizedBox(width: 6),
-                  // const Text(
-                  //   "successfully deleted",
-                  //   style: TextStyle(color: Colors.white70, fontSize: 20),
-                  // ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -201,39 +251,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 ),
               ),
             ),
-            // Container(
-            //   padding: const EdgeInsets.all(16),
-            //   decoration: BoxDecoration(
-            //     color: Colors.green.withOpacity(0.1),
-            //     borderRadius: BorderRadius.circular(12),
-            //     border: Border.all(color: Colors.green.withOpacity(0.3)),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       const Icon(Icons.delete_sweep, color: Colors.green, size: 28),
-            //       const SizedBox(width: 12),
-            //       Expanded(
-            //         child: Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             Text(
-            //               "$deletedCount image${deletedCount > 1 ? 's' : ''}",
-            //               style: const TextStyle(
-            //                 color: Colors.white,
-            //                 fontSize: 24,
-            //                 fontWeight: FontWeight.bold,
-            //               ),
-            //             ),
-            //             const Text(
-            //               "successfully deleted",
-            //               style: TextStyle(color: Colors.white70, fontSize: 14),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
             const SizedBox(height: 16),
             const Text(
               "You've freed up space! Continue or exit?",
@@ -276,29 +293,53 @@ class _GalleryScreenState extends State<GalleryScreen> {
             ),
           ),
           actions: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.delete_sweep,
-                      color: AppColors.brandPrimary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "$deletedCount",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.brandPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+            // Recently deleted icon - without badge
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: AppColors.brandPrimary,
+                size: 28,
               ),
+              onPressed: () async {
+                final changed = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RecentlyDeletedScreen(),
+                  ),
+                );
+                // Refresh gallery if items were restored or permanently deleted
+                if (changed == true && mounted) {
+                  debugPrint(
+                    '🔄 Refreshing gallery after recently deleted changes',
+                  );
+                  await _initGallery();
+                }
+              },
             ),
+            // Delete count
+            // Center(
+            //   child: Padding(
+            //     padding: const EdgeInsets.symmetric(horizontal: 10),
+            //     child: Row(
+            //       children: [
+            //         const Icon(
+            //           Icons.delete_sweep,
+            //           color: AppColors.brandPrimary,
+            //           size: 20,
+            //         ),
+            //         const SizedBox(width: 6),
+            //         Text(
+            //           "$deletedCount",
+            //           style: const TextStyle(
+            //             fontSize: 16,
+            //             color: AppColors.brandPrimary,
+            //             fontWeight: FontWeight.bold,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         bottomNavigationBar: _isBannerAdLoaded && _bannerAd != null
@@ -332,132 +373,169 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final groupedImages = _galleryService.groupedImages;
 
     if (groupedImages.isEmpty) {
-      return const Center(
-        child: Text("No photos found", style: TextStyle(color: Colors.white70)),
+      return RefreshIndicator(
+        onRefresh: _refreshGallery,
+        color: AppColors.brandPrimary,
+        backgroundColor: AppColors.backgroundSurface,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 200),
+            Center(
+              child: Text(
+                "No photos found",
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
     final sectionKeys = groupedImages.keys.toList();
 
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: sectionKeys.length + (_galleryService.isLoading ? 1 : 0),
-      itemBuilder: (context, sectionIndex) {
-        if (sectionIndex >= sectionKeys.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
+    return RefreshIndicator(
+      onRefresh: _refreshGallery,
+      color: AppColors.brandPrimary,
+      backgroundColor: AppColors.backgroundSurface,
+      child: ListView.builder(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: sectionKeys.length + (_galleryService.isLoading ? 1 : 0),
+        itemBuilder: (context, sectionIndex) {
+          if (sectionIndex >= sectionKeys.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          }
+
+          final label = sectionKeys[sectionIndex];
+          final photos = groupedImages[label]!;
+
+          return StickyHeader(
+            header: Container(
+              color: AppColors.backgroundPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             ),
-          );
-        }
-
-        final label = sectionKeys[sectionIndex];
-        final photos = groupedImages[label]!;
-
-        return StickyHeader(
-          header: Container(
-            color: AppColors.backgroundPrimary,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+            content: GridView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
               ),
-            ),
-          ),
-          content: GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-            ),
-            itemCount: photos.length,
-            itemBuilder: (_, index) {
-              final asset = photos[index];
-              final allImages = _galleryService.allImages;
-              final globalIndex = allImages.indexOf(asset);
+              itemCount: photos.length,
+              itemBuilder: (_, index) {
+                final asset = photos[index];
+                final allImages = _galleryService.allImages;
+                final globalIndex = allImages.indexOf(asset);
 
-              return GestureDetector(
-                onTap: () async {
-                  final imagesCopy = List<AssetEntity>.from(allImages);
-                  final deleted = await Navigator.push<int>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ImageViewerScreen(
-                        images: imagesCopy,
-                        initialIndex: globalIndex,
+                return GestureDetector(
+                  onTap: () async {
+                    final imagesCopy = List<AssetEntity>.from(allImages);
+                    final deleted = await Navigator.push<int>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ImageViewerScreen(
+                          images: imagesCopy,
+                          initialIndex: globalIndex,
+                        ),
+                      ),
+                    );
+
+                    if (deleted != null && deleted > 0) {
+                      setState(() => deletedCount += deleted);
+                      debugPrint("✅ Total deleted: $deletedCount");
+                      // Rebuild gallery to show filtered results
+                      await _initGallery();
+                    } else {
+                      // Just rebuild UI if no changes
+                      setState(() {});
+                    }
+                  },
+                  child: Hero(
+                    tag: asset.id,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          AssetEntityImage(
+                            asset,
+                            isOriginal: false,
+                            thumbnailSize: const ThumbnailSize.square(150),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.grey[800],
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          // Video indicator
+                          if (asset.type == AssetType.video)
+                            Positioned(
+                              bottom: 4,
+                              right: 4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                  );
-
-                  if (deleted != null && deleted > 0) {
-                    setState(() => deletedCount += deleted);
-                    debugPrint("✅ Total deleted: $deletedCount");
-                  }
-
-                  await _initGallery();
-                },
-                child: Hero(
-                  tag: asset.id,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        AssetEntityImage(
-                          asset,
-                          isOriginal: false,
-                          thumbnailSize: const ThumbnailSize.square(150),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey[800],
-                            child: const Icon(
-                              Icons.broken_image,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                        // Video indicator
-                        if (asset.type == AssetType.video)
-                          Positioned(
-                            bottom: 4,
-                            right: 4,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      },
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
+  }
+
+  Future<void> _refreshGallery() async {
+    await _initGallery();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gallery refreshed'),
+          duration: Duration(seconds: 1),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     _bannerAd?.dispose();
     super.dispose();

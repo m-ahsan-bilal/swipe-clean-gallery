@@ -1,15 +1,20 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 
 class ImageViewerService {
   final List<AssetEntity> images;
   final Map<String, Future<Uint8List?>> _imageCache = {};
   int deletedCount = 0;
+  late RecentlyDeletedService _deletedService;
 
   VoidCallback? onUpdate;
 
-  ImageViewerService(this.images, {this.onUpdate});
+  ImageViewerService(this.images, {this.onUpdate}) {
+    _deletedService = RecentlyDeletedService();
+    _deletedService.init();
+  }
 
   /// Get thumbnail bytes for both images and videos
   Future<Uint8List?> getThumbnailBytes(AssetEntity asset) {
@@ -38,7 +43,7 @@ class ImageViewerService {
           }
         }
       } catch (e) {
-        debugPrint("❌ Error loading asset ${asset.id}: $e");
+        debugPrint("Error loading asset ${asset.id}: $e");
         return null;
       }
     });
@@ -49,30 +54,41 @@ class ImageViewerService {
     final asset = images[currentIndex];
 
     try {
-      final deletedIds = await PhotoManager.editor.deleteWithIds([asset.id]);
-      final success = deletedIds.contains(asset.id);
+      // Add to recently deleted and delete from device
+      final success = await _deletedService.addDeletedItem(asset);
 
-      if (success) {
-        await PhotoManager.clearFileCache();
-        images.removeAt(currentIndex);
-        _imageCache.remove(asset.id);
-        deletedCount++;
-
-        if (onUpdate != null) onUpdate!();
-
+      if (!success) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "${asset.type == AssetType.video ? 'Video' : 'Photo'} deleted ($deletedCount deleted total)",
-              ),
+            const SnackBar(
+              content: Text('Failed to delete item'),
+              backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
-              duration: const Duration(milliseconds: 800),
             ),
           );
         }
+        return false;
       }
-      return success;
+
+      // Remove from current view
+      images.removeAt(currentIndex);
+      _imageCache.remove(asset.id);
+      deletedCount++;
+
+      if (onUpdate != null) onUpdate!();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${asset.type == AssetType.video ? 'Video' : 'Photo'} moved to recently deleted",
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return true;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

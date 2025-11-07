@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:swipe_clean_gallery/screens/permission_screen.dart';
+import 'package:swipe_clean_gallery/screens/splash_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 
 void main() async {
@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
           behavior: SnackBarBehavior.floating,
         ),
       ),
-      home: const PermissionScreen(),
+      home: const SplashScreen(),
     );
   }
 }

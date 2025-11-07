@@ -1,78 +1,100 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import '../screens/gallery_screen.dart';
 
 class PermissionService {
-  /// Requests permission to access media files.
-  static Future<void> requestPermission(BuildContext context) async {
-    final PermissionState result = await PhotoManager.requestPermissionExtend();
-
-    if (result.isAuth) {
-      _navigateToGallery(context);
-      return;
+  /// Get Android SDK version
+  static Future<int> getAndroidSdkVersion() async {
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.version.sdkInt;
     }
+    return 0;
+  }
 
-    if (result == PermissionState.limited) {
-      // We don't allow limited access: ask user to grant full access in Settings
-      if (context.mounted) {
-        await showDialog<void>(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Full Access Needed'),
-            content: const Text(
-              'Please grant full photo access to browse and clean your gallery.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await PhotoManager.openSetting();
-                },
-                child: const Text('Open Settings'),
-              ),
-            ],
+  /// Checks if all required permissions are granted
+  static Future<bool> hasAllPermissions() async {
+    try {
+      // Get Android version
+      final androidVersion = await getAndroidSdkVersion();
+      
+      // For Android 13+, we need READ_MEDIA_IMAGES and READ_MEDIA_VIDEO
+      // For Android 12 and below, we need READ_EXTERNAL_STORAGE
+      final PermissionState photoState = await PhotoManager.getPermissionState(
+        requestOption: PermissionRequestOption(
+          androidPermission: AndroidPermission(
+            type: androidVersion >= 33 ? RequestType.common : RequestType.common,
+            mediaLocation: false, // Don't require mediaLocation for simpler permission flow
           ),
-        );
-      }
-      return;
+        ),
+      );
+      
+      return photoState.isAuth;
+    } catch (e) {
+      debugPrint('Error checking permissions: $e');
+      return false;
     }
+  }
 
-    _showPermissionDeniedMessage(context);
+  /// Requests all necessary permissions
+  static Future<PermissionStatus> requestPermission(BuildContext context) async {
+    try {
+      // Get Android version
+      final androidVersion = await getAndroidSdkVersion();
+      
+      // Request permissions based on Android version
+      final PermissionState photoResult = await PhotoManager.requestPermissionExtend(
+        requestOption: PermissionRequestOption(
+          androidPermission: AndroidPermission(
+            type: RequestType.common,
+            mediaLocation: false, // Simplified permission for better UX
+          ),
+        ),
+      );
+
+      debugPrint('Permission result: $photoResult');
+
+      if (photoResult.isAuth) {
+        return PermissionStatus.granted;
+      } else if (photoResult == PermissionState.limited) {
+        // On Android, limited access still allows basic operations
+        return PermissionStatus.granted;
+      } else if (photoResult == PermissionState.denied) {
+        // Check if permanently denied by trying to request again
+        final secondTry = await PhotoManager.requestPermissionExtend();
+        if (secondTry == PermissionState.denied) {
+          return PermissionStatus.permanentlyDenied;
+        }
+        return PermissionStatus.denied;
+      }
+      
+      return PermissionStatus.denied;
+    } catch (e) {
+      debugPrint('Error requesting permissions: $e');
+      return PermissionStatus.denied;
+    }
   }
 
   /// Navigates to GalleryScreen after permission is granted
-  static void _navigateToGallery(BuildContext context) {
+  static void navigateToGallery(BuildContext context) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const GalleryScreen()),
     );
   }
 
-  /// Shows snackbar when permission is denied
-  static void _showPermissionDeniedMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-          "Permission needed to browse photos. Please allow in Settings.",
-        ),
-        action: SnackBarAction(
-          label: 'Open Settings',
-          onPressed: () {
-            PhotoManager.openSetting();
-          },
-        ),
-      ),
-    );
+  /// Opens app settings
+  static Future<void> openAppSettings() async {
+    await PhotoManager.openSetting();
   }
+}
 
-  /// Checks if permission is already granted
-  static Future<bool> hasPermission() async {
-    final PermissionState state = await PhotoManager.requestPermissionExtend();
-    // Only full access qualifies
-    return state.isAuth;
-  }
+enum PermissionStatus {
+  granted,
+  denied,
+  permanentlyDenied,
+  limited,
 }

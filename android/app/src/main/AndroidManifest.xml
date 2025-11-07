@@ -11,8 +11,8 @@
     <!-- Permissions for Android 9 and below (API 28 and below) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
     
-    <!-- Optional: For managing all files (use carefully) -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
+    <!-- ACCESS_MEDIA_LOCATION for metadata access -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
     
     <!-- Internet for ads -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -56,6 +56,10 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
+        </intent>
+        <!-- Query for opening app settings -->
+        <intent>
+            <action android:name="android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION" />
         </intent>
     </queries>
 </manifest>

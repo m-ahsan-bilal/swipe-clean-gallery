@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 
 class GalleryService {
   List<AssetEntity> allImages = [];
@@ -130,7 +131,7 @@ class GalleryService {
 
         if (filteredImages.isNotEmpty) {
           allImages.addAll(filteredImages);
-          _groupImages(filteredImages);
+          _groupImages(filteredImages); // Context will be added when screen rebuilds
         }
 
         currentPage++;
@@ -149,12 +150,12 @@ class GalleryService {
     }
   }
 
-  void _groupImages(List<AssetEntity> images) {
+  void _groupImages(List<AssetEntity> images, {BuildContext? context}) {
     debugPrint("Grouping ${images.length} items...");
 
     for (var asset in images) {
       final date = asset.createDateTime;
-      final String label = _formatDateLabel(date);
+      final String label = _formatDateLabel(date, context: context);
 
       if (!groupedImages.containsKey(label)) {
         groupedImages[label] = [];
@@ -167,40 +168,58 @@ class GalleryService {
     debugPrint("Grouping complete. Total groups: ${groupedImages.length}");
   }
 
-  String _formatDateLabel(DateTime date) {
+  String _formatDateLabel(DateTime date, {BuildContext? context}) {
     final now = DateTime.now();
     final difference = now.difference(date);
+    
+    // Get localizations if context is available
+    final l10n = context != null ? AppLocalizations.of(context) : null;
 
     if (difference.inDays == 0) {
-      return "Today";
+      return l10n?.today ?? "Today";
     } else if (difference.inDays == 1) {
-      return "Yesterday";
+      return l10n?.yesterday ?? "Yesterday";
     } else if (difference.inDays < 7) {
-      return "This Week";
+      return l10n?.thisWeek ?? "This Week";
     } else if (difference.inDays < 30) {
-      return "This Month";
+      return l10n?.thisMonth ?? "This Month";
     } else if (date.year == now.year) {
-      return "${_getMonthName(date.month)} ${date.year}";
+      return "${_getMonthName(date.month, l10n)} ${date.year}";
     } else {
       return "${date.year}";
     }
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return months[month - 1];
+  String _getMonthName(int month, AppLocalizations? l10n) {
+    if (l10n == null) {
+      const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
+      ];
+      return months[month - 1];
+    }
+    
+    switch (month) {
+      case 1: return l10n.january;
+      case 2: return l10n.february;
+      case 3: return l10n.march;
+      case 4: return l10n.april;
+      case 5: return l10n.may;
+      case 6: return l10n.june;
+      case 7: return l10n.july;
+      case 8: return l10n.august;
+      case 9: return l10n.september;
+      case 10: return l10n.october;
+      case 11: return l10n.november;
+      case 12: return l10n.december;
+      default: return "";
+    }
+  }
+  
+  /// Update grouping with context for localization
+  void updateGroupingWithContext(BuildContext context) {
+    if (allImages.isEmpty) return;
+    groupedImages.clear();
+    _groupImages(allImages, context: context);
   }
 }

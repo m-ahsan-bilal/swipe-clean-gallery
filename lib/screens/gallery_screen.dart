@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -7,6 +8,7 @@ import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:swipe_clean_gallery/screens/image_viewer_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/screens/recently_deleted_screen.dart';
+import 'package:swipe_clean_gallery/screens/settings_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/gallery_service.dart';
 import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
@@ -122,9 +124,10 @@ class _GalleryScreenState extends State<GalleryScreen>
       debugPrint("Gallery init error: $e");
       if (mounted) {
         setState(() => _isInitializing = false);
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error loading gallery: $e"),
+            content: Text(l10n.errorLoadingGallery(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -147,6 +150,8 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Future<bool> _onWillPop() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (deletedCount == 0) {
       final result = await showDialog<bool>(
         context: context,
@@ -155,9 +160,9 @@ class _GalleryScreenState extends State<GalleryScreen>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text(
-            "Exit Gallery",
-            style: TextStyle(color: Colors.white),
+          title: Text(
+            l10n.exitGallery,
+            style: const TextStyle(color: Colors.white),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -175,9 +180,9 @@ class _GalleryScreenState extends State<GalleryScreen>
                   ),
                 ),
               ),
-              const Text(
-                "You're leaving without cleaning. Come back soon!",
-                style: TextStyle(color: Colors.white70),
+              Text(
+                l10n.exitWithoutCleaningMessage,
+                style: const TextStyle(color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -185,11 +190,11 @@ class _GalleryScreenState extends State<GalleryScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("Cancel"),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("Exit", style: TextStyle(color: Colors.red)),
+              child: Text(l10n.exit, style: const TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -197,6 +202,7 @@ class _GalleryScreenState extends State<GalleryScreen>
       return result ?? false;
     }
 
+    final plural = deletedCount > 1 ? 's' : '';
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -218,17 +224,15 @@ class _GalleryScreenState extends State<GalleryScreen>
               ),
             ),
             const SizedBox(width: 12),
-            Row(
-              children: [
-                Text(
-                  "$deletedCount file${deletedCount > 1 ? 's' : ''} successfully deleted",
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                  ),
+            Flexible(
+              child: Text(
+                l10n.filesDeleted(deletedCount, plural),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -252,23 +256,23 @@ class _GalleryScreenState extends State<GalleryScreen>
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              "You've freed up space! Continue or exit?",
-              style: TextStyle(color: Colors.white70),
+            Text(
+              l10n.freedUpSpace,
+              style: const TextStyle(color: Colors.white70),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              "Keep Cleaning",
-              style: TextStyle(color: Colors.white70),
+            child: Text(
+              l10n.keepCleaning,
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Exit"),
+            child: Text(l10n.exit),
           ),
         ],
       ),
@@ -278,6 +282,13 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Update gallery grouping with localized date labels
+    if (_galleryService.allImages.isNotEmpty) {
+      _galleryService.updateGroupingWithContext(context);
+    }
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -285,15 +296,29 @@ class _GalleryScreenState extends State<GalleryScreen>
         appBar: AppBar(
           backgroundColor: AppColors.backgroundPrimary,
           elevation: 0,
-          title: const Text(
-            "Your Photos",
-            style: TextStyle(
+          title: Text(
+            l10n.yourPhotos,
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
           actions: [
-            // Recently deleted icon - without badge
+            // Settings icon
+            IconButton(
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: AppColors.textSecondary,
+                size: 26,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
+            // Recently deleted icon
             IconButton(
               icon: const Icon(
                 Icons.delete_outline,
@@ -351,15 +376,15 @@ class _GalleryScreenState extends State<GalleryScreen>
               )
             : null,
         body: _isInitializing
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: Colors.white),
+                    const SizedBox(height: 16),
                     Text(
-                      "Loading your photos...",
-                      style: TextStyle(color: Colors.white70),
+                      l10n.loadingPhotos,
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ],
                 ),
@@ -371,6 +396,7 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Widget _buildGalleryContent() {
     final groupedImages = _galleryService.groupedImages;
+    final l10n = AppLocalizations.of(context)!;
 
     if (groupedImages.isEmpty) {
       return RefreshIndicator(
@@ -379,12 +405,12 @@ class _GalleryScreenState extends State<GalleryScreen>
         backgroundColor: AppColors.backgroundSurface,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
-            SizedBox(height: 200),
+          children: [
+            const SizedBox(height: 200),
             Center(
               child: Text(
-                "No photos found",
-                style: TextStyle(color: Colors.white70),
+                l10n.noPhotosFound,
+                style: const TextStyle(color: Colors.white70),
               ),
             ),
           ],
@@ -523,10 +549,11 @@ class _GalleryScreenState extends State<GalleryScreen>
   Future<void> _refreshGallery() async {
     await _initGallery();
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gallery refreshed'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text(l10n.galleryRefreshed),
+          duration: const Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
         ),
       );

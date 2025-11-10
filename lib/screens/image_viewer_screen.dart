@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:swipe_clean_gallery/services/image_viewer_service.dart';
@@ -147,9 +148,10 @@ class _ImageViewerScreenState extends State<ImageViewerScreen>
     } catch (e) {
       debugPrint("Error opening video: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Unable to play video: $e"),
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+            content: Text(l10n.unableToPlayVideo(e.toString())),
             behavior: SnackBarBehavior.floating,
           ),
         );

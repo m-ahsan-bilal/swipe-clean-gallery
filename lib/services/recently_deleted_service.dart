@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 
 class RecentlyDeletedService {
   static const String _storageKey = 'recently_deleted_items';
@@ -202,32 +204,38 @@ class RecentlyDeletedService {
   }
 
   /// Group deleted items by date
-  Map<String, List<DeletedItem>> getGroupedItems() {
+  Map<String, List<DeletedItem>> getGroupedItems({BuildContext? context}) {
     final Map<String, List<DeletedItem>> grouped = {};
 
     for (final item in _deletedItems) {
-      final dateKey = _getDateLabel(item.deletedAt);
+      final dateKey = _getDateLabel(item.deletedAt, context: context);
       grouped.putIfAbsent(dateKey, () => []).add(item);
     }
 
     return grouped;
   }
 
-  String _getDateLabel(DateTime date) {
+  String _getDateLabel(DateTime date, {BuildContext? context}) {
     final now = DateTime.now();
     final difference = now.difference(date);
+    
+    // Get localizations if context is available
+    final l10n = context != null ? AppLocalizations.of(context) : null;
 
     if (difference.inDays == 0) {
-      return 'Today';
+      return l10n?.today ?? 'Today';
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return l10n?.yesterday ?? 'Yesterday';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return l10n?.daysAgo(difference.inDays) ?? '${difference.inDays} days ago';
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return '$weeks week${weeks > 1 ? 's' : ''} ago';
+      final plural = weeks > 1 ? 's' : '';
+      return l10n?.weeksAgo(weeks, plural) ?? '$weeks week$plural ago';
     } else {
-      return '${(difference.inDays / 30).floor()} month${(difference.inDays / 30).floor() > 1 ? 's' : ''} ago';
+      final months = (difference.inDays / 30).floor();
+      final plural = months > 1 ? 's' : '';
+      return l10n?.monthsAgo(months, plural) ?? '$months month$plural ago';
     }
   }
 }

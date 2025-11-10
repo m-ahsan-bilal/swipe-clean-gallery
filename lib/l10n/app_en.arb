@@ -1,0 +1,468 @@
+{
+  "@@locale": "en",
+  
+  "appTitle": "Swipe Clean Gallery",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "splashTitle": "Swipe Clean Gallery",
+  "@splashTitle": {
+    "description": "Title shown on splash screen"
+  },
+  
+  "splashSubtitle": "Swipe to organize your memories",
+  "@splashSubtitle": {
+    "description": "Subtitle shown on splash screen"
+  },
+  
+  "splashSwipeHint": "Swipe to clean",
+  "@splashSwipeHint": {
+    "description": "Hint text for swipe gesture"
+  },
+  
+  "languageSelectionTitle": "Choose Your Language",
+  "@languageSelectionTitle": {
+    "description": "Title of language selection screen"
+  },
+  
+  "languageSelectionSubtitle": "Select your preferred language to continue",
+  "@languageSelectionSubtitle": {
+    "description": "Subtitle of language selection screen"
+  },
+  
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  
+  "permissionRequired": "Permission Required",
+  "@permissionRequired": {
+    "description": "Permission required title"
+  },
+  
+  "accessYourPhotos": "Access Your Photos",
+  "@accessYourPhotos": {
+    "description": "Title for photo access permission"
+  },
+  
+  "permissionDeniedMessage": "This app requires full access to your photos and storage to function. Without permission, you cannot use the app. Please tap the button below to grant access in Settings.",
+  "@permissionDeniedMessage": {
+    "description": "Message shown when permission is denied"
+  },
+  
+  "permissionMessage": "Photo Swipe needs permission to view and manage photos on your device. Swipe to browse, swipe up to delete.",
+  "@permissionMessage": {
+    "description": "Initial permission request message"
+  },
+  
+  "appCannotBeUsed": "App cannot be used without permission",
+  "@appCannotBeUsed": {
+    "description": "Warning message for denied permission"
+  },
+  
+  "allowAccess": "Allow Access",
+  "@allowAccess": {
+    "description": "Button to allow permission"
+  },
+  
+  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Button to open app settings"
+  },
+  
+  "fullAccessRequired": "Full Access Required",
+  "@fullAccessRequired": {
+    "description": "Dialog title for full access requirement"
+  },
+  
+  "fullAccessMessage": "This app requires full photo access to function properly. Please grant full access in Settings.",
+  "@fullAccessMessage": {
+    "description": "Dialog message for full access requirement"
+  },
+  
+  "ok": "OK",
+  "@ok": {
+    "description": "OK button text"
+  },
+  
+  "enableAllFilesAccess": "Please enable \"All files access\" in Settings to use this app",
+  "@enableAllFilesAccess": {
+    "description": "Snackbar message for enabling all files access"
+  },
+  
+  "yourPhotos": "Your Photos",
+  "@yourPhotos": {
+    "description": "Gallery screen title"
+  },
+  
+  "loadingPhotos": "Loading your photos...",
+  "@loadingPhotos": {
+    "description": "Loading message for gallery"
+  },
+  
+  "noPhotosFound": "No photos found",
+  "@noPhotosFound": {
+    "description": "Message when no photos are available"
+  },
+  
+  "galleryRefreshed": "Gallery refreshed",
+  "@galleryRefreshed": {
+    "description": "Snackbar message after refreshing gallery"
+  },
+  
+  "errorLoadingGallery": "Error loading gallery: {error}",
+  "@errorLoadingGallery": {
+    "description": "Error message when gallery fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
+  
+  "exitGallery": "Exit Gallery",
+  "@exitGallery": {
+    "description": "Exit dialog title"
+  },
+  
+  "exitWithoutCleaningMessage": "You're leaving without cleaning. Come back soon!",
+  "@exitWithoutCleaningMessage": {
+    "description": "Message shown when exiting without deleting photos"
+  },
+  
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  
+  "exit": "Exit",
+  "@exit": {
+    "description": "Exit button text"
+  },
+  
+  "filesDeleted": "{count} file{plural} successfully deleted",
+  "@filesDeleted": {
+    "description": "Message showing number of deleted files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "plural": {
+        "type": "String",
+        "example": "s"
+      }
+    }
+  },
+  
+  "freedUpSpace": "You've freed up space! Continue or exit?",
+  "@freedUpSpace": {
+    "description": "Message after successfully deleting files"
+  },
+  
+  "keepCleaning": "Keep Cleaning",
+  "@keepCleaning": {
+    "description": "Button to continue cleaning"
+  },
+  
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  
+  "language": "Language",
+  "@language": {
+    "description": "Language option title"
+  },
+  
+  "changeLanguage": "Change Language",
+  "@changeLanguage": {
+    "description": "Button text to change language"
+  },
+  
+  "currentLanguage": "Current Language",
+  "@currentLanguage": {
+    "description": "Label for current language"
+  },
+  
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Dialog title for language selection"
+  },
+  
+  "languageChanged": "Language changed successfully",
+  "@languageChanged": {
+    "description": "Snackbar message after language change"
+  },
+  
+  "systemDefault": "System Default",
+  "@systemDefault": {
+    "description": "Option to use system default language"
+  },
+  
+  "recentlyDeleted": "Recently Deleted",
+  "@recentlyDeleted": {
+    "description": "Recently deleted screen title"
+  },
+  
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  
+  "restore": "Restore",
+  "@restore": {
+    "description": "Restore button text"
+  },
+  
+  "deleteForever": "Delete Forever",
+  "@deleteForever": {
+    "description": "Permanently delete button text"
+  },
+  
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button text"
+  },
+  
+  "deleteConfirmation": "Are you sure you want to delete this item?",
+  "@deleteConfirmation": {
+    "description": "Confirmation message for deletion"
+  },
+  
+  "permanentDeleteConfirmation": "This action cannot be undone. Are you sure?",
+  "@permanentDeleteConfirmation": {
+    "description": "Confirmation message for permanent deletion"
+  },
+  
+  "itemRestored": "Item restored successfully",
+  "@itemRestored": {
+    "description": "Message after restoring an item"
+  },
+  
+  "itemDeleted": "Item deleted permanently",
+  "@itemDeleted": {
+    "description": "Message after permanently deleting an item"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+  
+  "urdu": "اردو",
+  "@urdu": {
+    "description": "Urdu language name"
+  },
+  
+  "arabic": "العربية",
+  "@arabic": {
+    "description": "Arabic language name"
+  },
+  
+  "spanish": "Español",
+  "@spanish": {
+    "description": "Spanish language name"
+  },
+  
+  "french": "Français",
+  "@french": {
+    "description": "French language name"
+  },
+  
+  "german": "Deutsch",
+  "@german": {
+    "description": "German language name"
+  },
+  
+  "chinese": "中文",
+  "@chinese": {
+    "description": "Chinese language name"
+  },
+  
+  "hindi": "हिन्दी",
+  "@hindi": {
+    "description": "Hindi language name"
+  },
+  
+  "today": "Today",
+  "@today": {
+    "description": "Label for today's date"
+  },
+  
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Label for yesterday's date"
+  },
+  
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "Label for this week"
+  },
+  
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "Label for this month"
+  },
+  
+  "january": "January",
+  "february": "February",
+  "march": "March",
+  "april": "April",
+  "may": "May",
+  "june": "June",
+  "july": "July",
+  "august": "August",
+  "september": "September",
+  "october": "October",
+  "november": "November",
+  "december": "December",
+  
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "description": "Label for days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "weeksAgo": "{count} week{plural} ago",
+  "@weeksAgo": {
+    "description": "Label for weeks ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "monthsAgo": "{count} month{plural} ago",
+  "@monthsAgo": {
+    "description": "Label for months ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "selectAll": "Select All",
+  "deselectAll": "Deselect All",
+  "selectedCount": "selected",
+  "@selectedCount": {
+    "description": "Label for selected items"
+  },
+  
+  "restoreSelected": "Restore Selected",
+  "deleteSelected": "Delete Selected",
+  "emptyTrash": "Empty Trash",
+  "noDeletedItems": "No deleted items",
+  "deletedItemsMessage": "Deleted items will be kept for 30 days",
+  
+  "confirmRestore": "Restore {count} item{plural}?",
+  "@confirmRestore": {
+    "description": "Confirmation for restore",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "confirmDelete": "Permanently delete {count} item{plural}?",
+  "@confirmDelete": {
+    "description": "Confirmation for permanent delete",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "confirmEmptyTrash": "Empty trash?",
+  "confirmEmptyTrashMessage": "This will permanently delete all {count} items. This action cannot be undone.",
+  "@confirmEmptyTrashMessage": {
+    "description": "Confirmation message for emptying trash",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "itemsRestored": "{count} item{plural} restored",
+  "@itemsRestored": {
+    "description": "Message for restored items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "itemsDeleted": "{count} item{plural} deleted permanently",
+  "@itemsDeleted": {
+    "description": "Message for deleted items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "trashEmptied": "Trash emptied successfully",
+  "imageDeleted": "Image deleted",
+  "videoDeleted": "Video deleted",
+  "deletedSuccessfully": "Deleted successfully",
+  "restoredSuccessfully": "Restored successfully",
+  "errorOccurred": "An error occurred",
+  
+  "swipeUpToDelete": "Swipe up to delete",
+  "releaseToDelete": "Release to delete",
+  "deletingImage": "Deleting...",
+  "photo": "Photo",
+  "video": "Video",
+  "outOf": "of",
+  
+  "deleteThisItem": "Delete this item?",
+  "deleteItemMessage": "This item will be moved to recently deleted",
+  
+  "close": "Close",
+  "done": "Done",
+  
+  "unableToPlayVideo": "Unable to play video: {error}",
+  "@unableToPlayVideo": {
+    "description": "Error message when video playback fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "clearAll": "Clear All"
+}
+
+

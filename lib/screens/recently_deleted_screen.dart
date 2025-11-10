@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
@@ -74,11 +75,11 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
     _clearSelection();
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      final plural = restoredCount != 1 ? 's' : '';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '$restoredCount item${restoredCount != 1 ? 's' : ''} restored',
-          ),
+          content: Text(l10n.itemsRestored(restoredCount, plural)),
           backgroundColor: Colors.green,
         ),
       );
@@ -93,23 +94,24 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
   Future<void> _clearAll() async {
     if (_deletedService.count == 0) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.dialogBackground,
-        title: const Text('Clear All?', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.confirmEmptyTrash, style: const TextStyle(color: Colors.white)),
         content: Text(
-          'Permanently delete all ${_deletedService.count} items? This cannot be undone.',
+          l10n.confirmEmptyTrashMessage(_deletedService.count),
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear All', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.emptyTrash, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -156,7 +158,8 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedItems = _deletedService.getGroupedItems();
+    final l10n = AppLocalizations.of(context)!;
+    final groupedItems = _deletedService.getGroupedItems(context: context);
     final sectionKeys = groupedItems.keys.toList();
 
     return WillPopScope(
@@ -176,8 +179,8 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
           elevation: 0,
           title: Text(
             _isSelectionMode
-                ? '${_selectedItems.length} selected'
-                : 'Recently Deleted',
+                ? '${_selectedItems.length} ${l10n.selectedCount}'
+                : l10n.recentlyDeleted,
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
@@ -200,14 +203,14 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
             if (_isSelectionMode) ...[
               TextButton(
                 onPressed: _selectAll,
-                child: const Text('Select All'),
+                child: Text(l10n.selectAll),
               ),
             ] else if (_deletedService.count > 0) ...[
               TextButton(
                 onPressed: _clearAll,
-                child: const Text(
-                  'Clear All',
-                  style: TextStyle(color: Colors.red),
+                child: Text(
+                  l10n.emptyTrash,
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
             ],
@@ -226,14 +229,9 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
                       color: Colors.white.withOpacity(0.3),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'No recently deleted items',
-                      style: TextStyle(color: Colors.white70, fontSize: 18),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Items you delete will appear here',
-                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    Text(
+                      l10n.noDeletedItems,
+                      style: const TextStyle(color: Colors.white70, fontSize: 18),
                     ),
                   ],
                 ),
@@ -248,7 +246,7 @@ class _RecentlyDeletedScreenState extends State<RecentlyDeletedScreen> {
                       vertical: 8,
                     ),
                     child: Text(
-                      'Items will be permanently deleted after 30 days',
+                      l10n.deletedItemsMessage,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.6),
                         fontSize: 12,

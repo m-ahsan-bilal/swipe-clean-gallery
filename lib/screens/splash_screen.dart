@@ -4,6 +4,7 @@ import 'package:swipe_clean_gallery/screens/gallery_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/permission_service.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -86,6 +87,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: AnimatedBuilder(
@@ -160,9 +163,9 @@ class _SplashScreenState extends State<SplashScreen>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
-                        child: const Text(
-                          'Swipe Clean Gallery',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.splashTitle,
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -175,7 +178,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                       // Subtitle
                       Text(
-                        'Swipe to organize your memories',
+                        l10n.splashSubtitle,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withOpacity(0.7),
@@ -198,14 +201,14 @@ class _SplashScreenState extends State<SplashScreen>
                             return Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.swipe_up,
                                   color: AppColors.brandPrimary,
                                   size: 36,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Swipe to clean',
+                                  l10n.splashSwipeHint,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.white.withOpacity(0.6),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import '../services/permission_service.dart';
 import 'gallery_screen.dart';
 
@@ -99,29 +100,27 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   }
 
   void _showDeniedInstructions() {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Please enable "All files access" in Settings to use this app',
-        ),
-        duration: Duration(seconds: 4),
+      SnackBar(
+        content: Text(l10n.enableAllFilesAccess),
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
   Future<void> _showLimitedAccessDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Full Access Required'),
-        content: const Text(
-          'This app requires full photo access to function properly. Please grant full access in Settings.',
-        ),
+        title: Text(l10n.fullAccessRequired),
+        content: Text(l10n.fullAccessMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -132,6 +131,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F1417),
@@ -161,7 +161,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    _isPermissionDenied ? "Permission Required" : "Access Your Photos",
+                    _isPermissionDenied ? l10n.permissionRequired : l10n.accessYourPhotos,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
@@ -178,8 +178,8 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                     ),
                     child: Text(
                       _isPermissionDenied
-                          ? "This app requires full access to your photos and storage to function. Without permission, you cannot use the app. Please tap the button below to grant access in Settings."
-                          : "Photo Swipe needs permission to view and manage photos on your device. Swipe to browse, swipe up to delete.",
+                          ? l10n.permissionDeniedMessage
+                          : l10n.permissionMessage,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
@@ -211,10 +211,10 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                               size: 24,
                             ),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                "App cannot be used without permission",
-                                style: TextStyle(
+                                l10n.appCannotBeUsed,
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
                                 ),
@@ -262,7 +262,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                             ),
                           )
                         : Text(
-                            _isPermissionDenied ? "Open Settings" : "Allow Access",
+                            _isPermissionDenied ? l10n.openSettings : l10n.allowAccess,
                             style: const TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
                               fontWeight: FontWeight.w700,

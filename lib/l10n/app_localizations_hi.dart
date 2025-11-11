@@ -354,4 +354,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get clearAll => 'सभी साफ़ करें';
+
+  @override
+  String get noMoreCards => 'आप अंत तक पहुँच गए हैं';
+
+  @override
+  String get queueEmpty => 'हटाने के लिए कोई आइटम लंबित नहीं है';
 }

@@ -462,7 +462,9 @@
     }
   },
   
-  "clearAll": "Clear All"
+  "clearAll": "Clear All",
+  "noMoreCards": "You've reached the end",
+  "queueEmpty": "No items queued for deletion"
 }
 
 

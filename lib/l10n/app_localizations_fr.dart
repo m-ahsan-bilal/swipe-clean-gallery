@@ -356,4 +356,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get clearAll => 'Tout effacer';
+
+  @override
+  String get noMoreCards => 'Vous êtes arrivé au bout';
+
+  @override
+  String get queueEmpty => 'Aucun élément en attente de suppression';
 }

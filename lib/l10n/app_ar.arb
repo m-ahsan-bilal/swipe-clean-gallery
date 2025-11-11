@@ -113,5 +113,7 @@
   "close": "إغلاق",
   "done": "تم",
   "unableToPlayVideo": "تعذر تشغيل الفيديو: {error}",
-  "clearAll": "مسح الكل"
+  "clearAll": "مسح الكل",
+  "noMoreCards": "لقد وصلت إلى النهاية",
+  "queueEmpty": "لا توجد عناصر محددة للحذف"
 }

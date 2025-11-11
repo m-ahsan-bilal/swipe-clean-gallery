@@ -113,5 +113,7 @@
   "close": "Fermer",
   "done": "Terminé",
   "unableToPlayVideo": "Impossible de lire la vidéo : {error}",
-  "clearAll": "Tout effacer"
+  "clearAll": "Tout effacer",
+  "noMoreCards": "Vous êtes arrivé au bout",
+  "queueEmpty": "Aucun élément en attente de suppression"
 }

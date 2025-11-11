@@ -354,4 +354,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get clearAll => 'Borrar todo';
+
+  @override
+  String get noMoreCards => 'Has llegado al final';
+
+  @override
+  String get queueEmpty => 'No hay elementos pendientes por eliminar';
 }

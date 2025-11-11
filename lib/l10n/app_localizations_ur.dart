@@ -354,4 +354,10 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get clearAll => 'سب صاف کریں';
+
+  @override
+  String get noMoreCards => 'آپ آخر تک پہنچ چکے ہیں';
+
+  @override
+  String get queueEmpty => 'حذف کرنے کے لیے کوئی آئٹم منتخب نہیں';
 }

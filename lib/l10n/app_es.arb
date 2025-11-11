@@ -113,5 +113,7 @@
   "close": "Cerrar",
   "done": "Listo",
   "unableToPlayVideo": "No se puede reproducir el video: {error}",
-  "clearAll": "Borrar todo"
+  "clearAll": "Borrar todo",
+  "noMoreCards": "Has llegado al final",
+  "queueEmpty": "No hay elementos pendientes por eliminar"
 }

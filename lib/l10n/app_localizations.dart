@@ -739,6 +739,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear All'**
   String get clearAll;
+
+  /// No description provided for @noMoreCards.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the end'**
+  String get noMoreCards;
+
+  /// No description provided for @queueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No items queued for deletion'**
+  String get queueEmpty;
 }
 
 class _AppLocalizationsDelegate

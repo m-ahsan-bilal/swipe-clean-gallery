@@ -350,4 +350,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get clearAll => 'مسح الكل';
+
+  @override
+  String get noMoreCards => 'لقد وصلت إلى النهاية';
+
+  @override
+  String get queueEmpty => 'لا توجد عناصر محددة للحذف';
 }

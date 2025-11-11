@@ -113,5 +113,7 @@
   "close": "Schließen",
   "done": "Fertig",
   "unableToPlayVideo": "Video kann nicht abgespielt werden: {error}",
-  "clearAll": "Alles löschen"
+  "clearAll": "Alles löschen",
+  "noMoreCards": "Du bist am Ende angekommen",
+  "queueEmpty": "Keine Elemente zum Löschen vorgemerkt"
 }

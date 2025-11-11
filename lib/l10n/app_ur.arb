@@ -113,7 +113,9 @@
   "close": "بند کریں",
   "done": "مکمل",
   "unableToPlayVideo": "ویڈیو چلانے میں ناکام: {error}",
-  "clearAll": "سب صاف کریں"
+  "clearAll": "سب صاف کریں",
+  "noMoreCards": "آپ آخر تک پہنچ چکے ہیں",
+  "queueEmpty": "حذف کرنے کے لیے کوئی آئٹم منتخب نہیں"
 }
 
 

@@ -113,5 +113,7 @@
   "close": "关闭",
   "done": "完成",
   "unableToPlayVideo": "无法播放视频：{error}",
-  "clearAll": "全部清除"
+  "clearAll": "全部清除",
+  "noMoreCards": "你已经到达末尾",
+  "queueEmpty": "没有待删除的项目"
 }

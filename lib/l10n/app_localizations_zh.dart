@@ -345,4 +345,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get clearAll => '全部清除';
+
+  @override
+  String get noMoreCards => '你已经到达末尾';
+
+  @override
+  String get queueEmpty => '没有待删除的项目';
 }

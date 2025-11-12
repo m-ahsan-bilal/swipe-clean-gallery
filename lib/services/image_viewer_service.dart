@@ -1,20 +1,15 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 
 class ImageViewerService {
   final List<AssetEntity> images;
   final Map<String, Future<Uint8List?>> _imageCache = {};
   int deletedCount = 0;
-  late RecentlyDeletedService _deletedService;
 
   VoidCallback? onUpdate;
 
-  ImageViewerService(this.images, {this.onUpdate}) {
-    _deletedService = RecentlyDeletedService();
-    _deletedService.init();
-  }
+  ImageViewerService(this.images, {this.onUpdate});
 
   /// Get thumbnail bytes for both images and videos
   Future<Uint8List?> getThumbnailBytes(AssetEntity asset) {
@@ -54,8 +49,9 @@ class ImageViewerService {
     final asset = images[currentIndex];
 
     try {
-      // Add to recently deleted and delete from device
-      final success = await _deletedService.addDeletedItem(asset);
+      // Permanently delete from device
+      final deletedIds = await PhotoManager.editor.deleteWithIds([asset.id]);
+      final success = deletedIds.contains(asset.id);
 
       if (!success) {
         if (context.mounted) {
@@ -70,6 +66,9 @@ class ImageViewerService {
         return false;
       }
 
+      // Clear cache to ensure updates
+      await PhotoManager.clearFileCache();
+
       // Remove from current view
       images.removeAt(currentIndex);
       _imageCache.remove(asset.id);
@@ -81,7 +80,7 @@ class ImageViewerService {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "${asset.type == AssetType.video ? 'Video' : 'Photo'} moved to recently deleted",
+              "${asset.type == AssetType.video ? 'Video' : 'Photo'} deleted permanently",
             ),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),

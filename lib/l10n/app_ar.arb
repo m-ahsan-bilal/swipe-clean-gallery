@@ -115,5 +115,105 @@
   "unableToPlayVideo": "تعذر تشغيل الفيديو: {error}",
   "clearAll": "مسح الكل",
   "noMoreCards": "لقد وصلت إلى النهاية",
-  "queueEmpty": "لا توجد عناصر محددة للحذف"
+  "queueEmpty": "لا توجد عناصر محددة للحذف",
+
+  "yes": "نعم",
+  "@yes": {
+    "description": "نص زر الموافقة"
+  },
+
+  "no": "لا",
+  "@no": {
+    "description": "نص زر الرفض"
+  },
+
+  "onboardingWelcomeTitle": "مرحبًا بك في SnapBin Gallery",
+  "@onboardingWelcomeTitle": {
+    "description": "عنوان شاشة الترحيب في الإعداد"
+  },
+
+  "onboardingWelcomeSubtitle": "تجربة معرض ذكية ومتحركة.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "نص فرعي لشاشة الترحيب"
+  },
+
+  "onboardingSwipeTitle": "استكشف معرضك",
+  "@onboardingSwipeTitle": {
+    "description": "عنوان شاشة التنقل بالسحب"
+  },
+
+  "onboardingSwipeSubtitle": "اسحب يسارًا أو يمينًا للتنقل بين صورك ومقاطع الفيديو الخاصة بك.",
+  "@onboardingSwipeSubtitle": {
+    "description": "نص فرعي لشاشة التنقل بالسحب"
+  },
+
+  "onboardingDeleteTitle": "اسحب للأعلى للحذف",
+  "@onboardingDeleteTitle": {
+    "description": "عنوان شاشة الحذف"
+  },
+
+  "onboardingDeleteSubtitle": "رسوم متحركة لطي الورق ترسل ملفك إلى سلة المهملات — بسرعة ونظافة ومتعة!",
+  "@onboardingDeleteSubtitle": {
+    "description": "نص فرعي لشاشة الحذف"
+  },
+
+  "onboardingOrganizeTitle": "إدارة بلمسة",
+  "@onboardingOrganizeTitle": {
+    "description": "عنوان شاشة التنظيم"
+  },
+
+  "onboardingOrganizeSubtitle": "اضغط على أيقونة سلة المهملات لمراجعة العناصر أو حذفها نهائيًا.",
+  "@onboardingOrganizeSubtitle": {
+    "description": "نص فرعي لشاشة التنظيم"
+  },
+
+  "onboardingSkip": "تخطي",
+  "@onboardingSkip": {
+    "description": "زر لتخطي الإعداد"
+  },
+
+  "onboardingNext": "التالي",
+  "@onboardingNext": {
+    "description": "زر للانتقال إلى الصفحة التالية"
+  },
+
+  "onboardingDone": "ابدأ الآن",
+  "@onboardingDone": {
+    "description": "زر لإنهاء الإعداد"
+  },
+
+  "theme": "السمة",
+  "@theme": {
+    "description": "عنوان قسم السمة في الإعدادات"
+  },
+
+  "themeModeLabel": "وضع السمة",
+  "@themeModeLabel": {
+    "description": "وصف لمبدل السمة"
+  },
+
+  "themeDark": "الوضع الداكن",
+  "@themeDark": {
+    "description": "خيار الوضع الداكن"
+  },
+
+  "themeLight": "الوضع الفاتح",
+  "@themeLight": {
+    "description": "خيار الوضع الفاتح"
+  },
+
+  "about": "حول التطبيق",
+  "@about": {
+    "description": "عنوان قسم المعلومات في الإعدادات"
+  },
+
+  "aboutAppName": "معرض سوايب كلين",
+  "aboutVersion": "الإصدار {version}",
+  "aboutDescription": "تم تصميم معرض سوايب كلين لجعل تنظيف مكتبة الوسائط الخاصة بك أمرًا سهلاً. قم بالتمرير عبر صورك ومقاطع الفيديو الخاصة بك مع رسوم متحركة سلسة، وضع عناصر في قائمة الانتظار للحذف، واستمتع بتأثيرات احتفالية عندما تقوم بتحرير المساحة.",
+  "aboutKeyFeatures": "الميزات الرئيسية",
+  "aboutFeature1": "مكدس بطاقات بأسلوب تيندر لتصفح الوسائط عنصرًا واحدًا في كل مرة.",
+  "aboutFeature2": "إيماءات التمرير للتنقل السريع ورسوم متحركة مرضية للحذف.",
+  "aboutFeature3": "تجربة محلية مع دعم للغات متعددة وتخطيطات من اليمين إلى اليسار.",
+  "aboutFeature4": "سمات قابلة للتخصيص حتى تتمكن من الاختيار بين الأوضاع الفاتحة والداكنة.",
+  "aboutClosing": "لقد قمنا ببناء معرض سوايب كلين للجمع بين الأداء وإمكانية الوصول وقليل من البهجة. شكرًا لتجربته!"
 }

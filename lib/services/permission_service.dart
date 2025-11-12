@@ -20,18 +20,21 @@ class PermissionService {
     try {
       // Get Android version
       final androidVersion = await getAndroidSdkVersion();
-      
+
       // For Android 13+, we need READ_MEDIA_IMAGES and READ_MEDIA_VIDEO
       // For Android 12 and below, we need READ_EXTERNAL_STORAGE
       final PermissionState photoState = await PhotoManager.getPermissionState(
         requestOption: PermissionRequestOption(
           androidPermission: AndroidPermission(
-            type: androidVersion >= 33 ? RequestType.common : RequestType.common,
-            mediaLocation: false, // Don't require mediaLocation for simpler permission flow
+            type: androidVersion >= 33
+                ? RequestType.common
+                : RequestType.common,
+            mediaLocation:
+                false, // Don't require mediaLocation for simpler permission flow
           ),
         ),
       );
-      
+
       return photoState.isAuth;
     } catch (e) {
       debugPrint('Error checking permissions: $e');
@@ -40,20 +43,23 @@ class PermissionService {
   }
 
   /// Requests all necessary permissions
-  static Future<PermissionStatus> requestPermission(BuildContext context) async {
+  static Future<PermissionStatus> requestPermission(
+    BuildContext context,
+  ) async {
     try {
       // Get Android version
-      final androidVersion = await getAndroidSdkVersion();
-      
+      //  final androidVersion = await getAndroidSdkVersion();
+
       // Request permissions based on Android version
-      final PermissionState photoResult = await PhotoManager.requestPermissionExtend(
-        requestOption: PermissionRequestOption(
-          androidPermission: AndroidPermission(
-            type: RequestType.common,
-            mediaLocation: false, // Simplified permission for better UX
-          ),
-        ),
-      );
+      final PermissionState photoResult =
+          await PhotoManager.requestPermissionExtend(
+            requestOption: PermissionRequestOption(
+              androidPermission: AndroidPermission(
+                type: RequestType.common,
+                mediaLocation: false, // Simplified permission for better UX
+              ),
+            ),
+          );
 
       debugPrint('Permission result: $photoResult');
 
@@ -70,7 +76,7 @@ class PermissionService {
         }
         return PermissionStatus.denied;
       }
-      
+
       return PermissionStatus.denied;
     } catch (e) {
       debugPrint('Error requesting permissions: $e');
@@ -92,9 +98,4 @@ class PermissionService {
   }
 }
 
-enum PermissionStatus {
-  granted,
-  denied,
-  permanentlyDenied,
-  limited,
-}
+enum PermissionStatus { granted, denied, permanentlyDenied, limited }

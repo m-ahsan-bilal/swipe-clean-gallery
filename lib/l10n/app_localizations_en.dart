@@ -95,6 +95,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to SnapBin Gallery';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Your smart, animated gallery experience.';
+
+  @override
+  String get onboardingSwipeTitle => 'Explore Your Gallery';
+
+  @override
+  String get onboardingSwipeSubtitle =>
+      'Swipe left or right to browse through your images and videos.';
+
+  @override
+  String get onboardingDeleteTitle => 'Swipe Up to Delete';
+
+  @override
+  String get onboardingDeleteSubtitle =>
+      'A paper-fold animation sends your file to the bin — fast, clean, and fun!';
+
+  @override
+  String get onboardingOrganizeTitle => 'Manage with a Tap';
+
+  @override
+  String get onboardingOrganizeSubtitle =>
+      'Tap the bin icon to review or delete items permanently.';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingDone => 'Get Started';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeModeLabel => 'Theme mode';
+
+  @override
+  String get themeDark => 'Dark mode';
+
+  @override
+  String get themeLight => 'Light mode';
+
+  @override
+  String get about => 'About';
+
+  @override
   String get exit => 'Exit';
 
   @override
@@ -357,4 +415,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get queueEmpty => 'No items queued for deletion';
+
+  @override
+  String get aboutAppName => 'SwipeClean Gallery';
+
+  @override
+  String aboutVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'SwipeClean Gallery is designed to make cleaning up your media library effortless. Swipe through your photos and videos with fluid animations, queue up deletions, and enjoy celebratory effects when you clear space.';
+
+  @override
+  String get aboutKeyFeatures => 'Key Features';
+
+  @override
+  String get aboutFeature1 =>
+      'Tinder-style card stack to browse media one item at a time.';
+
+  @override
+  String get aboutFeature2 =>
+      'Swipe gestures for quick navigation and satisfying deletion animations.';
+
+  @override
+  String get aboutFeature3 =>
+      'Localized experience with support for multiple languages and right-to-left layouts.';
+
+  @override
+  String get aboutFeature4 =>
+      'Customizable themes so you can pick between light and dark modes.';
+
+  @override
+  String get aboutClosing =>
+      'We built SwipeClean Gallery to combine performance, accessibility, and a bit of delight. Thank you for trying it out!';
 }

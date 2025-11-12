@@ -1,200 +1,132 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:swipe_clean_gallery/services/app_colors.dart';
-import 'package:swipe_clean_gallery/services/localization_service.dart';
 import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
+
+import 'package:swipe_clean_gallery/services/localization_service.dart';
+import 'package:swipe_clean_gallery/services/theme_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final localizationService = Provider.of<LocalizationService>(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final localizationService = context.watch<LocalizationService>();
+    final themeService = context.watch<ThemeService>();
+
+    final isDarkMode =
+        themeService.themeMode == ThemeMode.dark ||
+        (themeService.themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundPrimary,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundPrimary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          l10n.settings,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
-          // Language Section
-          _buildSectionHeader(l10n.language),
-          const SizedBox(height: 12),
-          _buildLanguageCard(context, localizationService, l10n),
+          _SectionHeader(label: l10n.language),
+          _LanguageCard(
+            localizationService: localizationService,
+            l10n: l10n,
+            colorScheme: colorScheme,
+          ),
           const SizedBox(height: 24),
-
-          // App Info Section
-          _buildSectionHeader('About'),
-          const SizedBox(height: 12),
-          _buildInfoCard(context),
+          _SectionHeader(label: l10n.theme),
+          _ThemeCard(
+            isDarkMode: isDarkMode,
+            onChanged: (value) => themeService.toggleDarkMode(value),
+            colorScheme: colorScheme,
+            l10n: l10n,
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSectionHeader(String title) {
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
       child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 14,
+        label,
+        style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w600,
-          color: AppColors.textSecondary,
-          letterSpacing: 0.5,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
         ),
       ),
     );
   }
+}
 
-  Widget _buildLanguageCard(
-    BuildContext context,
-    LocalizationService localizationService,
-    AppLocalizations l10n,
-  ) {
-    final currentLanguageCode = localizationService.currentLocale.languageCode;
-    final currentLanguageName = LocalizationService.getNativeName(currentLanguageCode);
-    final currentFlag = LocalizationService.getFlag(currentLanguageCode);
+class _LanguageCard extends StatelessWidget {
+  const _LanguageCard({
+    required this.localizationService,
+    required this.l10n,
+    required this.colorScheme,
+  });
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+  final LocalizationService localizationService;
+  final AppLocalizations l10n;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final currentCode = localizationService.currentLocale.languageCode;
+    final currentName = LocalizationService.getNativeName(currentCode);
+    final flag = LocalizationService.getFlag(currentCode);
+
+    return _SettingsCard(
+      onTap: () =>
+          _showLanguageDialog(context, localizationService, l10n, colorScheme),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceVariant.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(flag, style: const TextStyle(fontSize: 28)),
+            ),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _showLanguageDialog(context, localizationService, l10n),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Flag
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundPrimary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      currentFlag,
-                      style: const TextStyle(fontSize: 28),
-                    ),
+                Text(
+                  l10n.currentLanguage,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
-                const SizedBox(width: 16),
-                // Language info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.currentLanguage,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        currentLanguageName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 4),
+                Text(
+                  currentName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                ),
-                // Arrow icon
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.textTertiary,
-                  size: 18,
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.brandPrimary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.info_outline,
-                  color: AppColors.brandPrimary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Swipe Clean Gallery',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Version 1.0.0',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Icon(
+            Icons.chevron_right,
+            color: colorScheme.onSurface.withOpacity(0.4),
           ),
         ],
       ),
@@ -205,93 +137,51 @@ class SettingsScreen extends StatelessWidget {
     BuildContext context,
     LocalizationService localizationService,
     AppLocalizations l10n,
+    ColorScheme colorScheme,
   ) {
     final currentLanguageCode = localizationService.currentLocale.languageCode;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.dialogBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           l10n.selectLanguage,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: LocalizationService.supportedLanguages.length,
             itemBuilder: (context, index) {
-              final entry = LocalizationService.supportedLanguages.entries.toList()[index];
+              final entry = LocalizationService.supportedLanguages.entries
+                  .toList()[index];
               final languageCode = entry.key;
               final languageData = entry.value;
               final isSelected = currentLanguageCode == languageCode;
 
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () async {
-                    await localizationService.changeLanguage(languageCode);
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.languageChanged),
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+              return ListTile(
+                onTap: () async {
+                  await localizationService.changeLanguage(languageCode);
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.languageChanged),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
                     ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.brandPrimary.withOpacity(0.1)
-                          : Colors.transparent,
-                    ),
-                    child: Row(
-                      children: [
-                        // Flag
-                        Text(
-                          languageData['flag'] ?? '🌐',
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        // Language name
-                        Expanded(
-                          child: Text(
-                            languageData['nativeName'] ?? '',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              color: isSelected
-                                  ? AppColors.brandPrimary
-                                  : AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        // Check icon
-                        if (isSelected)
-                          const Icon(
-                            Icons.check_circle,
-                            color: AppColors.brandPrimary,
-                            size: 24,
-                          ),
-                      ],
-                    ),
-                  ),
+                  );
+                },
+                leading: Text(
+                  languageData['flag'] ?? '🌐',
+                  style: const TextStyle(fontSize: 24),
                 ),
+                title: Text(languageData['nativeName'] ?? ''),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle, color: colorScheme.primary)
+                    : null,
               );
             },
           ),
@@ -299,10 +189,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -310,4 +197,84 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+class _ThemeCard extends StatelessWidget {
+  const _ThemeCard({
+    required this.isDarkMode,
+    required this.onChanged,
+    required this.colorScheme,
+    required this.l10n,
+  });
 
+  final bool isDarkMode;
+  final ValueChanged<bool> onChanged;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingsCard(
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isDarkMode ? Icons.dark_mode : Icons.light_mode,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.themeModeLabel,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isDarkMode ? l10n.themeDark : l10n.themeLight,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: isDarkMode, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.child, this.onTap});
+
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(padding: const EdgeInsets.all(16), child: child),
+      ),
+    );
+  }
+}

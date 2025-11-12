@@ -93,6 +93,63 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
+  String get yes => 'نعم';
+
+  @override
+  String get no => 'لا';
+
+  @override
+  String get onboardingWelcomeTitle => 'مرحبًا بك في SnapBin Gallery';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'تجربة معرض ذكية ومتحركة.';
+
+  @override
+  String get onboardingSwipeTitle => 'استكشف معرضك';
+
+  @override
+  String get onboardingSwipeSubtitle =>
+      'اسحب يسارًا أو يمينًا للتنقل بين صورك ومقاطع الفيديو الخاصة بك.';
+
+  @override
+  String get onboardingDeleteTitle => 'اسحب للأعلى للحذف';
+
+  @override
+  String get onboardingDeleteSubtitle =>
+      'رسوم متحركة لطي الورق ترسل ملفك إلى سلة المهملات — بسرعة ونظافة ومتعة!';
+
+  @override
+  String get onboardingOrganizeTitle => 'إدارة بلمسة';
+
+  @override
+  String get onboardingOrganizeSubtitle =>
+      'اضغط على أيقونة سلة المهملات لمراجعة العناصر أو حذفها نهائيًا.';
+
+  @override
+  String get onboardingSkip => 'تخطي';
+
+  @override
+  String get onboardingNext => 'التالي';
+
+  @override
+  String get onboardingDone => 'ابدأ الآن';
+
+  @override
+  String get theme => 'السمة';
+
+  @override
+  String get themeModeLabel => 'وضع السمة';
+
+  @override
+  String get themeDark => 'الوضع الداكن';
+
+  @override
+  String get themeLight => 'الوضع الفاتح';
+
+  @override
+  String get about => 'حول التطبيق';
+
+  @override
   String get exit => 'خروج';
 
   @override
@@ -356,4 +413,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get queueEmpty => 'لا توجد عناصر محددة للحذف';
+
+  @override
+  String get aboutAppName => 'معرض سوايب كلين';
+
+  @override
+  String aboutVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'تم تصميم معرض سوايب كلين لجعل تنظيف مكتبة الوسائط الخاصة بك أمرًا سهلاً. قم بالتمرير عبر صورك ومقاطع الفيديو الخاصة بك مع رسوم متحركة سلسة، وضع عناصر في قائمة الانتظار للحذف، واستمتع بتأثيرات احتفالية عندما تقوم بتحرير المساحة.';
+
+  @override
+  String get aboutKeyFeatures => 'الميزات الرئيسية';
+
+  @override
+  String get aboutFeature1 =>
+      'مكدس بطاقات بأسلوب تيندر لتصفح الوسائط عنصرًا واحدًا في كل مرة.';
+
+  @override
+  String get aboutFeature2 =>
+      'إيماءات التمرير للتنقل السريع ورسوم متحركة مرضية للحذف.';
+
+  @override
+  String get aboutFeature3 =>
+      'تجربة محلية مع دعم للغات متعددة وتخطيطات من اليمين إلى اليسار.';
+
+  @override
+  String get aboutFeature4 =>
+      'سمات قابلة للتخصيص حتى تتمكن من الاختيار بين الأوضاع الفاتحة والداكنة.';
+
+  @override
+  String get aboutClosing =>
+      'لقد قمنا ببناء معرض سوايب كلين للجمع بين الأداء وإمكانية الوصول وقليل من البهجة. شكرًا لتجربته!';
 }

@@ -97,6 +97,64 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cancel => 'Abbrechen';
 
   @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
+
+  @override
+  String get onboardingWelcomeTitle => 'Willkommen bei SnapBin Gallery';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Deine smarte, animierte Galerie-Erfahrung.';
+
+  @override
+  String get onboardingSwipeTitle => 'Entdecke deine Galerie';
+
+  @override
+  String get onboardingSwipeSubtitle =>
+      'Wische nach links oder rechts, um durch deine Fotos und Videos zu blättern.';
+
+  @override
+  String get onboardingDeleteTitle => 'Wische nach oben zum Löschen';
+
+  @override
+  String get onboardingDeleteSubtitle =>
+      'Eine Faltanimation schickt deine Datei in den Papierkorb – schnell, sauber und spaßig!';
+
+  @override
+  String get onboardingOrganizeTitle => 'Organisiere mit einem Tipp';
+
+  @override
+  String get onboardingOrganizeSubtitle =>
+      'Tippe auf das Papierkorb-Symbol, um Elemente zu überprüfen oder dauerhaft zu löschen.';
+
+  @override
+  String get onboardingSkip => 'Überspringen';
+
+  @override
+  String get onboardingNext => 'Weiter';
+
+  @override
+  String get onboardingDone => 'Los geht\'s';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeModeLabel => 'Darstellungsmodus';
+
+  @override
+  String get themeDark => 'Dunkler Modus';
+
+  @override
+  String get themeLight => 'Heller Modus';
+
+  @override
+  String get about => 'Über';
+
+  @override
   String get exit => 'Beenden';
 
   @override
@@ -363,4 +421,39 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get queueEmpty => 'Keine Elemente zum Löschen vorgemerkt';
+
+  @override
+  String get aboutAppName => 'SwipeClean Galerie';
+
+  @override
+  String aboutVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'SwipeClean Galerie ist darauf ausgelegt, das Aufräumen Ihrer Medienbibliothek mühelos zu machen. Wischen Sie durch Ihre Fotos und Videos mit flüssigen Animationen, reihen Sie Löschungen in die Warteschlange ein und genießen Sie festliche Effekte, wenn Sie Speicherplatz freigeben.';
+
+  @override
+  String get aboutKeyFeatures => 'Hauptmerkmale';
+
+  @override
+  String get aboutFeature1 =>
+      'Tinder-ähnlicher Kartenstapel zum Durchsuchen von Medien, jeweils ein Element.';
+
+  @override
+  String get aboutFeature2 =>
+      'Wischgesten für schnelle Navigation und befriedigende Löschanimationen.';
+
+  @override
+  String get aboutFeature3 =>
+      'Lokalisierte Erfahrung mit Unterstützung für mehrere Sprachen und Rechts-nach-Links-Layouts.';
+
+  @override
+  String get aboutFeature4 =>
+      'Anpassbare Themen, damit Sie zwischen hellen und dunklen Modi wählen können.';
+
+  @override
+  String get aboutClosing =>
+      'Wir haben SwipeClean Galerie gebaut, um Leistung, Barrierefreiheit und ein bisschen Freude zu vereinen. Vielen Dank, dass Sie es ausprobiert haben!';
 }

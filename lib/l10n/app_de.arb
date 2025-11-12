@@ -115,5 +115,105 @@
   "unableToPlayVideo": "Video kann nicht abgespielt werden: {error}",
   "clearAll": "Alles löschen",
   "noMoreCards": "Du bist am Ende angekommen",
-  "queueEmpty": "Keine Elemente zum Löschen vorgemerkt"
+  "queueEmpty": "Keine Elemente zum Löschen vorgemerkt",
+
+  "yes": "Ja",
+  "@yes": {
+    "description": "Bestätigungsbutton"
+  },
+
+  "no": "Nein",
+  "@no": {
+    "description": "Ablehnungsbutton"
+  },
+
+  "onboardingWelcomeTitle": "Willkommen bei SnapBin Gallery",
+  "@onboardingWelcomeTitle": {
+    "description": "Titel für den Onboarding-Willkommensbildschirm"
+  },
+
+  "onboardingWelcomeSubtitle": "Deine smarte, animierte Galerie-Erfahrung.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Untertitel für den Willkommensbildschirm"
+  },
+
+  "onboardingSwipeTitle": "Entdecke deine Galerie",
+  "@onboardingSwipeTitle": {
+    "description": "Titel für den Navigationsbildschirm"
+  },
+
+  "onboardingSwipeSubtitle": "Wische nach links oder rechts, um durch deine Fotos und Videos zu blättern.",
+  "@onboardingSwipeSubtitle": {
+    "description": "Untertitel für den Navigationsbildschirm"
+  },
+
+  "onboardingDeleteTitle": "Wische nach oben zum Löschen",
+  "@onboardingDeleteTitle": {
+    "description": "Titel für den Löschbildschirm"
+  },
+
+  "onboardingDeleteSubtitle": "Eine Faltanimation schickt deine Datei in den Papierkorb – schnell, sauber und spaßig!",
+  "@onboardingDeleteSubtitle": {
+    "description": "Untertitel für den Löschbildschirm"
+  },
+
+  "onboardingOrganizeTitle": "Organisiere mit einem Tipp",
+  "@onboardingOrganizeTitle": {
+    "description": "Titel für den Organisationsbildschirm"
+  },
+
+  "onboardingOrganizeSubtitle": "Tippe auf das Papierkorb-Symbol, um Elemente zu überprüfen oder dauerhaft zu löschen.",
+  "@onboardingOrganizeSubtitle": {
+    "description": "Untertitel für den Organisationsbildschirm"
+  },
+
+  "onboardingSkip": "Überspringen",
+  "@onboardingSkip": {
+    "description": "Button zum Überspringen"
+  },
+
+  "onboardingNext": "Weiter",
+  "@onboardingNext": {
+    "description": "Button für nächste Seite"
+  },
+
+  "onboardingDone": "Los geht's",
+  "@onboardingDone": {
+    "description": "Button zum Beenden des Onboardings"
+  },
+
+  "theme": "Theme",
+  "@theme": {
+    "description": "Titel des Theme-Abschnitts"
+  },
+
+  "themeModeLabel": "Darstellungsmodus",
+  "@themeModeLabel": {
+    "description": "Bezeichnung für den Theme-Umschalter"
+  },
+
+  "themeDark": "Dunkler Modus",
+  "@themeDark": {
+    "description": "Beschriftung für dunklen Modus"
+  },
+
+  "themeLight": "Heller Modus",
+  "@themeLight": {
+    "description": "Beschriftung für hellen Modus"
+  },
+
+  "about": "Über",
+  "@about": {
+    "description": "Titel des About-Abschnitts"
+  },
+
+  "aboutAppName": "SwipeClean Galerie",
+  "aboutVersion": "Version {version}",
+  "aboutDescription": "SwipeClean Galerie ist darauf ausgelegt, das Aufräumen Ihrer Medienbibliothek mühelos zu machen. Wischen Sie durch Ihre Fotos und Videos mit flüssigen Animationen, reihen Sie Löschungen in die Warteschlange ein und genießen Sie festliche Effekte, wenn Sie Speicherplatz freigeben.",
+  "aboutKeyFeatures": "Hauptmerkmale",
+  "aboutFeature1": "Tinder-ähnlicher Kartenstapel zum Durchsuchen von Medien, jeweils ein Element.",
+  "aboutFeature2": "Wischgesten für schnelle Navigation und befriedigende Löschanimationen.",
+  "aboutFeature3": "Lokalisierte Erfahrung mit Unterstützung für mehrere Sprachen und Rechts-nach-Links-Layouts.",
+  "aboutFeature4": "Anpassbare Themen, damit Sie zwischen hellen und dunklen Modi wählen können.",
+  "aboutClosing": "Wir haben SwipeClean Galerie gebaut, um Leistung, Barrierefreiheit und ein bisschen Freude zu vereinen. Vielen Dank, dass Sie es ausprobiert haben!"
 }

@@ -90,6 +90,60 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cancel => '取消';
 
   @override
+  String get yes => '是';
+
+  @override
+  String get no => '否';
+
+  @override
+  String get onboardingWelcomeTitle => '欢迎使用 SnapBin Gallery';
+
+  @override
+  String get onboardingWelcomeSubtitle => '体验智能又富有动感的图库。';
+
+  @override
+  String get onboardingSwipeTitle => '浏览你的图库';
+
+  @override
+  String get onboardingSwipeSubtitle => '左右滑动即可查看所有照片和视频。';
+
+  @override
+  String get onboardingDeleteTitle => '上滑即可删除';
+
+  @override
+  String get onboardingDeleteSubtitle => '纸张折叠动画让删除变得快捷、干净又有趣！';
+
+  @override
+  String get onboardingOrganizeTitle => '轻松管理';
+
+  @override
+  String get onboardingOrganizeSubtitle => '轻点回收站图标即可查看或永久删除项目。';
+
+  @override
+  String get onboardingSkip => '跳过';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingDone => '开始使用';
+
+  @override
+  String get theme => '主题';
+
+  @override
+  String get themeModeLabel => '主题模式';
+
+  @override
+  String get themeDark => '深色模式';
+
+  @override
+  String get themeLight => '浅色模式';
+
+  @override
+  String get about => '关于';
+
+  @override
   String get exit => '退出';
 
   @override
@@ -351,4 +405,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get queueEmpty => '没有待删除的项目';
+
+  @override
+  String get aboutAppName => '滑动清理相册';
+
+  @override
+  String aboutVersion(String version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      '滑动清理相册旨在让清理您的媒体库变得轻松。通过流畅的动画浏览您的照片和视频，将它们排队删除，并在您清理空间时享受庆祝效果。';
+
+  @override
+  String get aboutKeyFeatures => '主要功能';
+
+  @override
+  String get aboutFeature1 => '类似Tinder的卡片堆叠，一次浏览一个媒体项目。';
+
+  @override
+  String get aboutFeature2 => '滑动手势实现快速导航和令人满意的删除动画。';
+
+  @override
+  String get aboutFeature3 => '支持多种语言和从右到左布局的本地化体验。';
+
+  @override
+  String get aboutFeature4 => '可自定义主题，您可以在浅色和深色模式之间进行选择。';
+
+  @override
+  String get aboutClosing => '我们构建了滑动清理相册，将性能、可访问性和一点乐趣相结合。感谢您的试用！';
 }

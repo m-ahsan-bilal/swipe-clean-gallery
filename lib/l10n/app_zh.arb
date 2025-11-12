@@ -115,5 +115,105 @@
   "unableToPlayVideo": "无法播放视频：{error}",
   "clearAll": "全部清除",
   "noMoreCards": "你已经到达末尾",
-  "queueEmpty": "没有待删除的项目"
+  "queueEmpty": "没有待删除的项目",
+
+  "yes": "是",
+  "@yes": {
+    "description": "确认按钮文本"
+  },
+
+  "no": "否",
+  "@no": {
+    "description": "取消按钮文本"
+  },
+
+  "onboardingWelcomeTitle": "欢迎使用 SnapBin Gallery",
+  "@onboardingWelcomeTitle": {
+    "description": "欢迎页面标题"
+  },
+
+  "onboardingWelcomeSubtitle": "体验智能又富有动感的图库。",
+  "@onboardingWelcomeSubtitle": {
+    "description": "欢迎页面副标题"
+  },
+
+  "onboardingSwipeTitle": "浏览你的图库",
+  "@onboardingSwipeTitle": {
+    "description": "滑动页面标题"
+  },
+
+  "onboardingSwipeSubtitle": "左右滑动即可查看所有照片和视频。",
+  "@onboardingSwipeSubtitle": {
+    "description": "滑动页面副标题"
+  },
+
+  "onboardingDeleteTitle": "上滑即可删除",
+  "@onboardingDeleteTitle": {
+    "description": "删除页面标题"
+  },
+
+  "onboardingDeleteSubtitle": "纸张折叠动画让删除变得快捷、干净又有趣！",
+  "@onboardingDeleteSubtitle": {
+    "description": "删除页面副标题"
+  },
+
+  "onboardingOrganizeTitle": "轻松管理",
+  "@onboardingOrganizeTitle": {
+    "description": "整理页面标题"
+  },
+
+  "onboardingOrganizeSubtitle": "轻点回收站图标即可查看或永久删除项目。",
+  "@onboardingOrganizeSubtitle": {
+    "description": "整理页面副标题"
+  },
+
+  "onboardingSkip": "跳过",
+  "@onboardingSkip": {
+    "description": "跳过按钮"
+  },
+
+  "onboardingNext": "下一步",
+  "@onboardingNext": {
+    "description": "下一步按钮"
+  },
+
+  "onboardingDone": "开始使用",
+  "@onboardingDone": {
+    "description": "开始按钮"
+  },
+
+  "theme": "主题",
+  "@theme": {
+    "description": "设置中的主题部分标题"
+  },
+
+  "themeModeLabel": "主题模式",
+  "@themeModeLabel": {
+    "description": "主题开关的说明文字"
+  },
+
+  "themeDark": "深色模式",
+  "@themeDark": {
+    "description": "深色模式标签"
+  },
+
+  "themeLight": "浅色模式",
+  "@themeLight": {
+    "description": "浅色模式标签"
+  },
+
+  "about": "关于",
+  "@about": {
+    "description": "设置中关于部分标题"
+  },
+
+  "aboutAppName": "滑动清理相册",
+  "aboutVersion": "版本 {version}",
+  "aboutDescription": "滑动清理相册旨在让清理您的媒体库变得轻松。通过流畅的动画浏览您的照片和视频，将它们排队删除，并在您清理空间时享受庆祝效果。",
+  "aboutKeyFeatures": "主要功能",
+  "aboutFeature1": "类似Tinder的卡片堆叠，一次浏览一个媒体项目。",
+  "aboutFeature2": "滑动手势实现快速导航和令人满意的删除动画。",
+  "aboutFeature3": "支持多种语言和从右到左布局的本地化体验。",
+  "aboutFeature4": "可自定义主题，您可以在浅色和深色模式之间进行选择。",
+  "aboutClosing": "我们构建了滑动清理相册，将性能、可访问性和一点乐趣相结合。感谢您的试用！"
 }

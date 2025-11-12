@@ -96,6 +96,64 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cancel => 'रद्द करें';
 
   @override
+  String get yes => 'हाँ';
+
+  @override
+  String get no => 'नहीं';
+
+  @override
+  String get onboardingWelcomeTitle => 'SnapBin Gallery में आपका स्वागत है';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'आपका स्मार्ट और एनिमेटेड गैलरी अनुभव।';
+
+  @override
+  String get onboardingSwipeTitle => 'अपनी गैलरी खोजें';
+
+  @override
+  String get onboardingSwipeSubtitle =>
+      'अपनी तस्वीरों और वीडियो को देखने के लिए बाएँ या दाएँ स्वाइप करें।';
+
+  @override
+  String get onboardingDeleteTitle => 'हटाने के लिए ऊपर स्वाइप करें';
+
+  @override
+  String get onboardingDeleteSubtitle =>
+      'पेपर-फोल्ड एनीमेशन आपकी फ़ाइल को डस्टबिन में भेजता है — तेज़, साफ़ और मज़ेदार!';
+
+  @override
+  String get onboardingOrganizeTitle => 'एक टैप में व्यवस्थित करें';
+
+  @override
+  String get onboardingOrganizeSubtitle =>
+      'आइटम की समीक्षा या स्थायी रूप से हटाने के लिए बिन आइकन पर टैप करें।';
+
+  @override
+  String get onboardingSkip => 'छोड़ें';
+
+  @override
+  String get onboardingNext => 'आगे';
+
+  @override
+  String get onboardingDone => 'शुरू करें';
+
+  @override
+  String get theme => 'थीम';
+
+  @override
+  String get themeModeLabel => 'थीम मोड';
+
+  @override
+  String get themeDark => 'डार्क मोड';
+
+  @override
+  String get themeLight => 'लाइट मोड';
+
+  @override
+  String get about => 'हमारे बारे में';
+
+  @override
   String get exit => 'बाहर निकलें';
 
   @override
@@ -360,4 +418,39 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get queueEmpty => 'हटाने के लिए कोई आइटम लंबित नहीं है';
+
+  @override
+  String get aboutAppName => 'स्वाइप क्लीन गैलरी';
+
+  @override
+  String aboutVersion(String version) {
+    return 'संस्करण $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'स्वाइप क्लीन गैलरी आपकी मीडिया लाइब्रेरी को साफ करने को आसान बनाने के लिए डिज़ाइन की गई है। तरल एनिमेशन के साथ अपनी तस्वीरों और वीडियो के माध्यम से स्वाइप करें, हटाने के लिए कतारबद्ध करें, और जब आप स्थान साफ करते हैं तो उत्सव के प्रभावों का आनंद लें।';
+
+  @override
+  String get aboutKeyFeatures => 'मुख्य विशेषताएं';
+
+  @override
+  String get aboutFeature1 =>
+      'एक समय में एक मीडिया आइटम ब्राउज़ करने के लिए टिंडर-शैली का कार्ड स्टैक।';
+
+  @override
+  String get aboutFeature2 =>
+      'त्वरित नेविगेशन और संतोषजनक हटाने एनिमेशन के लिए स्वाइप जेस्चर।';
+
+  @override
+  String get aboutFeature3 =>
+      'कई भाषाओं और दाएं से बाएं लेआउट के समर्थन के साथ स्थानीयकृत अनुभव।';
+
+  @override
+  String get aboutFeature4 =>
+      'अनुकूलन योग्य थीम ताकि आप हल्के और गहरे मोड के बीच चुन सकें।';
+
+  @override
+  String get aboutClosing =>
+      'हमने प्रदर्शन, पहुंच, और थोड़ी सी खुशी को संयोजित करने के लिए स्वाइप क्लीन गैलरी बनाई। इसे आजमाने के लिए धन्यवाद!';
 }

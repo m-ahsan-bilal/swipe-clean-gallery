@@ -115,7 +115,105 @@
   "unableToPlayVideo": "ویڈیو چلانے میں ناکام: {error}",
   "clearAll": "سب صاف کریں",
   "noMoreCards": "آپ آخر تک پہنچ چکے ہیں",
-  "queueEmpty": "حذف کرنے کے لیے کوئی آئٹم منتخب نہیں"
+  "queueEmpty": "حذف کرنے کے لیے کوئی آئٹم منتخب نہیں",
+
+  "yes": "ہاں",
+  "@yes": {
+    "description": "ہاں کے بٹن کا متن"
+  },
+
+  "no": "نہیں",
+  "@no": {
+    "description": "نہیں کے بٹن کا متن"
+  },
+
+  "onboardingWelcomeTitle": "SnapBin Gallery میں خوش آمدید",
+  "@onboardingWelcomeTitle": {
+    "description": "آن بورڈنگ کے خوش آمدید صفحے کا عنوان"
+  },
+
+  "onboardingWelcomeSubtitle": "آپ کا ذہین اور متحرک گیلری کا تجربہ۔",
+  "@onboardingWelcomeSubtitle": {
+    "description": "خوش آمدید صفحے کا ذیلی عنوان"
+  },
+
+  "onboardingSwipeTitle": "اپنی گیلری دریافت کریں",
+  "@onboardingSwipeTitle": {
+    "description": "سوائپ صفحے کا عنوان"
+  },
+
+  "onboardingSwipeSubtitle": "اپنی تصاویر اور ویڈیوز دیکھنے کے لیے بائیں یا دائیں سوائپ کریں۔",
+  "@onboardingSwipeSubtitle": {
+    "description": "سوائپ صفحے کا ذیلی عنوان"
+  },
+
+  "onboardingDeleteTitle": "حذف کرنے کے لیے اوپر سوائپ کریں",
+  "@onboardingDeleteTitle": {
+    "description": "حذف صفحے کا عنوان"
+  },
+
+  "onboardingDeleteSubtitle": "کاغذ موڑنے والی اینیمیشن آپ کی فائل کو بین میں بھیجتی ہے — تیز، صاف اور دلچسپ!",
+  "@onboardingDeleteSubtitle": {
+    "description": "حذف صفحے کا ذیلی عنوان"
+  },
+
+  "onboardingOrganizeTitle": "ایک ٹپ پر منظم کریں",
+  "@onboardingOrganizeTitle": {
+    "description": "تنظیمی صفحے کا عنوان"
+  },
+
+  "onboardingOrganizeSubtitle": "آئٹمز کا جائزہ لینے یا مستقل طور پر حذف کرنے کے لیے بین آئیکون پر ٹیپ کریں۔",
+  "@onboardingOrganizeSubtitle": {
+    "description": "تنظیمی صفحے کا ذیلی عنوان"
+  },
+
+  "onboardingSkip": "اسکپ کریں",
+  "@onboardingSkip": {
+    "description": "آن بورڈنگ چھوڑنے کا بٹن"
+  },
+
+  "onboardingNext": "اگلا",
+  "@onboardingNext": {
+    "description": "اگلے صفحے کا بٹن"
+  },
+
+  "onboardingDone": "شروع کریں",
+  "@onboardingDone": {
+    "description": "آن بورڈنگ مکمل کرنے کا بٹن"
+  },
+
+  "theme": "تھیم",
+  "@theme": {
+    "description": "سیٹنگز میں تھیم کا عنوان"
+  },
+
+  "themeModeLabel": "تھیم موڈ",
+  "@themeModeLabel": {
+    "description": "تھیم سوئچ کا متن"
+  },
+
+  "themeDark": "ڈارک موڈ",
+  "@themeDark": {
+    "description": "ڈارک موڈ کا لیبل"
+  },
+
+  "themeLight": "لائٹ موڈ",
+  "@themeLight": {
+    "description": "لائٹ موڈ کا لیبل"
+  },
+
+  "about": "ہمارے بارے میں",
+  "@about": {
+    "description": "سیٹنگز میں معلوماتی سیکشن کا عنوان"
+  },
+
+  "aboutAppName": "سوائپ کلین گیلری",
+  "aboutVersion": "ورژن {version}",
+  "aboutDescription": "سوائپ کلین گیلری آپ کی میڈیا لائبریری کو صاف کرنے کو آسان بنانے کے لیے ڈیزائن کی گئی ہے۔ روانی انیمیشن کے ساتھ اپنی تصاویر اور ویڈیوز کے ذریعے سوائپ کریں، حذف کرنے کے لیے قطار میں لگائیں، اور جب آپ جگہ صاف کرتے ہیں تو جشن کے اثرات سے لطف اندوز ہوں۔",
+  "aboutKeyFeatures": "اہم خصوصیات",
+  "aboutFeature1": "ایک وقت میں ایک میڈیا آئٹم براؤز کرنے کے لیے ٹنڈر طرز کا کارڈ اسٹیک۔",
+  "aboutFeature2": "تیز نیویگیشن اور اطمینان بخش حذف کرنے کی انیمیشنز کے لیے سوائپ اشارے۔",
+  "aboutFeature3": "متعدد زبانوں اور دائیں سے بائیں ترتیب کی حمایت کے ساتھ مقامی تجربہ۔",
+  "aboutFeature4": "حسب ضرورت تھیمز تاکہ آپ ہلکے اور گہرے موڈز میں سے انتخاب کر سکیں۔",
+  "aboutClosing": "ہم نے کارکردگی، رسائی، اور تھوڑی سی خوشی کو یکجا کرنے کے لیے سوائپ کلین گیلری بنائی۔ اسے آزمانے کا شکریہ!"
 }
-
-

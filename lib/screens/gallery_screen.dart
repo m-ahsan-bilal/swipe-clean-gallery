@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -8,11 +10,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
+import 'package:swipe_clean_gallery/screens/about_us_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/screens/settings_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/gallery_service.dart';
-import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 
 enum _SwipeDirection { left, right, up }
 
@@ -26,7 +28,6 @@ class GalleryScreen extends StatefulWidget {
 class _GalleryScreenState extends State<GalleryScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late GalleryService _galleryService;
-  late RecentlyDeletedService _deletedService;
 
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
@@ -41,7 +42,7 @@ class _GalleryScreenState extends State<GalleryScreen>
   int _topCardIndex = 0;
   Offset _cardOffset = Offset.zero;
   double _cardRotation = 0.0;
-  int _recentlyDeletedCount = 0;
+  int _totalDeletedCount = 0;
 
   @override
   void initState() {
@@ -64,22 +65,9 @@ class _GalleryScreenState extends State<GalleryScreen>
               });
             }
           });
-    _deletedService = RecentlyDeletedService(
-      onUpdate: () {
-        if (mounted) {
-          // Just rebuild UI, don't reinitialize gallery
-          setState(() {});
-        }
-      },
-    );
-    _galleryService = GalleryService(_deletedService);
-    _initService();
+    _galleryService = GalleryService();
+    _initGallery();
     _loadBannerAd();
-  }
-
-  Future<void> _initService() async {
-    await _deletedService.init();
-    await _initGallery();
   }
 
   @override
@@ -131,7 +119,7 @@ class _GalleryScreenState extends State<GalleryScreen>
     )..load();
   }
 
-  Future<void> _initGallery() async {
+  Future<void> _initGallery({bool playIntro = true}) async {
     // Prevent multiple simultaneous calls
     if (_isRefreshing) {
       debugPrint("⏭️ Already refreshing, skipping...");
@@ -148,10 +136,13 @@ class _GalleryScreenState extends State<GalleryScreen>
         _pendingDeletionQueue.clear();
         _cardOffset = Offset.zero;
         _cardRotation = 0.0;
-        _hasPlayedIntro = false;
+        // Only reset intro animation if explicitly requested
+        if (playIntro) {
+          _hasPlayedIntro = false;
+        }
         setState(() => _isInitializing = false);
         _syncCardAssets(resetIndex: true);
-        if (_cardAssets.isNotEmpty) {
+        if (_cardAssets.isNotEmpty && playIntro) {
           if (_introController.isAnimating) {
             _introController.stop();
           }
@@ -240,23 +231,79 @@ class _GalleryScreenState extends State<GalleryScreen>
           elevation: 0,
           title: Text(
             l10n.yourPhotos,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
           actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.settings_outlined,
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
                 color: AppColors.textSecondary,
                 size: 26,
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                );
+              offset: const Offset(0, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'settings',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.settings_outlined,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.settings,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'about',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.about,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (String value) {
+                switch (value) {
+                  case 'settings':
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    );
+                    break;
+                  case 'about':
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AboutUsScreen()),
+                    );
+                    break;
+                }
               },
             ),
           ],
@@ -274,11 +321,17 @@ class _GalleryScreenState extends State<GalleryScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(color: Colors.white),
+                    CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.loadingPhotos,
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
+                      ),
                     ),
                   ],
                 ),
@@ -304,7 +357,11 @@ class _GalleryScreenState extends State<GalleryScreen>
             Center(
               child: Text(
                 l10n.noPhotosFound,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.7),
+                ),
               ),
             ),
           ],
@@ -421,124 +478,57 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Future<bool> _onWillPop() async {
     final l10n = AppLocalizations.of(context)!;
+    final hasDeletedImages = _totalDeletedCount > 0;
 
-    if (_recentlyDeletedCount == 0) {
-      final shouldExit = await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: AppColors.dialogBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            l10n.exitGallery,
-            style: const TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Image.asset(
-                  'assets/images/sad.png',
-                  height: 120,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.mood_bad,
-                    color: Colors.white54,
-                    size: 80,
-                  ),
-                ),
-              ),
-              Text(
-                l10n.exitWithoutCleaningMessage,
-                style: const TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.exit, style: const TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
-      );
-      return shouldExit ?? false;
-    }
-
-    final plural = _recentlyDeletedCount > 1 ? 's' : '';
     final shouldExit = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.brandPrimary.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.check_circle_outline,
-                color: AppColors.brandPrimary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                l10n.filesDeleted(_recentlyDeletedCount, plural),
-                style: const TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-            ),
-          ],
-        ),
+        title: Text(l10n.exitGallery),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Image.asset(
-                  'assets/images/happy.png',
-                  height: 140,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.celebration,
-                    color: AppColors.brandPrimary,
-                    size: 80,
-                  ),
-                ),
+            Image.asset(
+              hasDeletedImages
+                  ? 'assets/images/happy.png'
+                  : 'assets/images/sad.png',
+              height: 120,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                hasDeletedImages ? Icons.celebration : Icons.mood_bad,
+                size: 80,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.freedUpSpace,
-              style: const TextStyle(color: Colors.white70),
+              hasDeletedImages
+                  ? l10n.freedUpSpace
+                  : l10n.exitWithoutCleaningMessage,
+              textAlign: TextAlign.center,
             ),
+            if (hasDeletedImages)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  '$_totalDeletedCount ${_totalDeletedCount > 1 ? l10n.filesDeleted(_totalDeletedCount, 's') : l10n.filesDeleted(_totalDeletedCount, '')}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              l10n.keepCleaning,
-              style: const TextStyle(color: Colors.white70),
-            ),
+            child: Text(l10n.cancel),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.exit),
+            child: Text(l10n.exit, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -584,43 +574,68 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Widget _buildBinButton(AppLocalizations l10n) {
     final pendingCount = _pendingDeletionQueue.length;
+    final isEmpty = pendingCount == 0;
 
     return Column(
       children: [
         Stack(
           clipBehavior: Clip.none,
           children: [
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
               decoration: BoxDecoration(
-                color: AppColors.brandPrimary,
+                color: isEmpty
+                    ? AppColors.brandPrimary.withOpacity(0.7)
+                    : AppColors.brandPrimary,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.brandPrimary.withOpacity(0.4),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
+                    color: AppColors.brandPrimary.withOpacity(
+                      isEmpty ? 0.2 : 0.4,
+                    ),
+                    blurRadius: isEmpty ? 12 : 16,
+                    offset: Offset(0, isEmpty ? 6 : 8),
                   ),
                 ],
               ),
               child: IconButton(
                 iconSize: 28,
                 onPressed: _onBinPressed,
-                icon: const Icon(Icons.delete_outline, color: Colors.white),
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+                  child: Icon(
+                    isEmpty ? Icons.delete_outline : Icons.delete,
+                    key: ValueKey<bool>(isEmpty),
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
             if (pendingCount > 0)
               Positioned(
                 top: -6,
                 right: -6,
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: Colors.redAccent,
-                  child: Text(
-                    pendingCount.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.elasticOut,
+                  tween: Tween<double>(begin: 0.0, end: 1.0),
+                  builder: (context, scale, child) {
+                    return Transform.scale(scale: scale, child: child);
+                  },
+                  child: CircleAvatar(
+                    radius: 12,
+                    backgroundColor: Colors.redAccent,
+                    child: Text(
+                      pendingCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -628,11 +643,31 @@ class _GalleryScreenState extends State<GalleryScreen>
           ],
         ),
         if (pendingCount > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              '$pendingCount ${l10n.selectedCount}',
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            builder: (context, opacity, child) {
+              return Opacity(
+                opacity: opacity,
+                child: Transform.translate(
+                  offset: Offset(0, 10 * (1 - opacity)),
+                  child: child,
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '$pendingCount ${l10n.selectedCount}',
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
       ],
@@ -648,8 +683,8 @@ class _GalleryScreenState extends State<GalleryScreen>
             children: [
               Text(
                 '${_pendingDeletionQueue.length} ${l10n.selectedCount}',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -657,7 +692,12 @@ class _GalleryScreenState extends State<GalleryScreen>
               const SizedBox(height: 8),
               Text(
                 l10n.deleteSelected,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -667,12 +707,16 @@ class _GalleryScreenState extends State<GalleryScreen>
       return Center(
         child: Text(
           l10n.noPhotosFound,
-          style: const TextStyle(color: Colors.white70, fontSize: 16),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            fontSize: 16,
+          ),
         ),
       );
     }
 
-    final depth = 3;
+    // Show 4 cards in stack for better depth perception
+    final depth = 4;
     final widgets = <Widget>[];
     final maxDepth = math.min(depth, _cardAssets.length - _topCardIndex);
 
@@ -682,27 +726,50 @@ class _GalleryScreenState extends State<GalleryScreen>
       final asset = _cardAssets[cardIndex];
       final depthIndex = i;
       final isTop = depthIndex == 0;
-      final offsetY = depthIndex * 26.0;
-      final scale = 1 - depthIndex * 0.07;
-      final opacity = 1 - depthIndex * 0.14;
+
+      // Pronounced stacking effect - cards clearly visible beneath
+      final offsetY = -depthIndex * 45.0; // Larger offset for visible stack
+      final scale = 1 - depthIndex * 0.06; // More pronounced scale change
+      final opacity = math.max(
+        0.5,
+        1 - depthIndex * 0.12,
+      ); // Maintain visibility
 
       widgets.add(
-        Positioned.fill(
-          top: offsetY,
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: offsetY, // Position from bottom to show stack beneath
+          top: 0,
           child: Transform.scale(
             scale: scale,
-            alignment: Alignment.topCenter,
+            alignment: Alignment.bottomCenter, // Scale from bottom
             child: Opacity(
               opacity: opacity,
-              child: isTop
-                  ? _buildInteractiveCard(asset, width, height)
-                  : ImageFiltered(
-                      imageFilter: ImageFilter.blur(
-                        sigmaX: depthIndex * 1.5,
-                        sigmaY: depthIndex * 1.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  // Add subtle shadow between cards for depth
+                  boxShadow: isTop
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                ),
+                child: isTop
+                    ? _buildInteractiveCard(asset, width, height)
+                    : ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: depthIndex * 1.2,
+                          sigmaY: depthIndex * 1.2,
+                        ),
+                        child: _buildStaticCard(asset, width, height),
                       ),
-                      child: _buildStaticCard(asset, width, height),
-                    ),
+              ),
             ),
           ),
         ),
@@ -755,58 +822,73 @@ class _GalleryScreenState extends State<GalleryScreen>
   Widget _buildCardSurface(AssetEntity asset) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: Colors.black,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 24),
-          ),
-        ],
+        // borderRadius: BorderRadius.circular(30),
+        // Gradient background for better image display
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1a1a1a), Color(0xFF0a0a0a)],
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            AssetEntityImage(
-              asset,
-              isOriginal: false,
-              thumbnailSize: const ThumbnailSize.square(1600),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey[850],
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.grey,
-                  size: 48,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Use contain to show complete image without cropping
+          AssetEntityImage(
+            asset,
+            isOriginal: false,
+            thumbnailSize: const ThumbnailSize.square(1200),
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Container(
+              color: Colors.grey[850],
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.broken_image_outlined,
+                color: Colors.grey,
+                size: 48,
+              ),
+            ),
+          ),
+          // Add subtle gradient overlay at bottom for stack visibility
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
-            if (asset.type == AssetType.video)
-              Center(
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 42,
+          ),
+          if (asset.type == AssetType.video)
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 2,
                   ),
                 ),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 42,
+                ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -908,16 +990,9 @@ class _GalleryScreenState extends State<GalleryScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l10n.confirmDelete(count, plural),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          l10n.permanentDeleteConfirmation,
-          style: const TextStyle(color: Colors.white70),
-        ),
+        title: Text(l10n.confirmDelete(count, plural)),
+        content: Text(l10n.permanentDeleteConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -941,20 +1016,21 @@ class _GalleryScreenState extends State<GalleryScreen>
   Future<void> _deleteQueuedAssets() async {
     if (_pendingDeletionQueue.isEmpty) return;
     final ids = _pendingDeletionQueue.map((asset) => asset.id).toList();
+    final deleteCount = ids.length;
     try {
       await PhotoManager.editor.deleteWithIds(ids);
       await PhotoManager.clearFileCache();
+      // Update total deleted count
+      _totalDeletedCount += deleteCount;
     } catch (e) {
       debugPrint('Error deleting assets: $e');
     }
 
     _pendingDeletionQueue.clear();
-    await _initGallery();
+    // Don't play intro animation after deletion
+    await _initGallery(playIntro: false);
     if (!mounted) return;
     await _showFireworksOverlay();
-    setState(() {
-      _recentlyDeletedCount += ids.length;
-    });
   }
 
   Future<void> _showFireworksOverlay() async {
@@ -975,14 +1051,12 @@ class _GalleryScreenState extends State<GalleryScreen>
               child: Transform.scale(scale: scale, child: child),
             );
           },
-          child: Container(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [Color(0x55FFFFFF), Colors.transparent],
-              ),
+          child: Center(
+            child: const SizedBox(
+              width: 280,
+              height: 280,
+              child: _FireworksCelebration(),
             ),
-            child: const _FireworksCelebration(),
           ),
         );
       },
@@ -1002,7 +1076,8 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Future<void> _refreshGallery() async {
-    await _initGallery();
+    // Don't replay intro on manual refresh
+    await _initGallery(playIntro: false);
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(

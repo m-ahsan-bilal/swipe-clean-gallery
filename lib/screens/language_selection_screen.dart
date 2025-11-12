@@ -1,16 +1,21 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/localization_service.dart';
+import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
 
   @override
-  State<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
+  State<LanguageSelectionScreen> createState() =>
+      _LanguageSelectionScreenState();
 }
 
-class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with SingleTickerProviderStateMixin {
+class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
+    with SingleTickerProviderStateMixin {
   String? _selectedLanguage;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -51,7 +56,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       return;
     }
 
-    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final localizationService = Provider.of<LocalizationService>(
+      context,
+      listen: false,
+    );
     await localizationService.changeLanguage(_selectedLanguage!);
     await localizationService.setFirstLaunchComplete();
 
@@ -62,6 +70,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: FadeTransition(
@@ -102,7 +112,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.language,
                           size: 40,
                           color: AppColors.brandPrimary,
@@ -110,8 +120,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                       ),
                       const SizedBox(height: 24),
                       // Title
-                      const Text(
-                        'Choose Your Language',
+                      Text(
+                        l10n.languageSelectionTitle,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -123,7 +133,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                       const SizedBox(height: 12),
                       // Subtitle
                       Text(
-                        'Select your preferred language to continue',
+                        l10n.languageSelectionSubtitle,
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.textSecondary,
@@ -142,7 +152,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                     child: ListView.builder(
                       itemCount: LocalizationService.supportedLanguages.length,
                       itemBuilder: (context, index) {
-                        final entry = LocalizationService.supportedLanguages.entries.toList()[index];
+                        final entry = LocalizationService
+                            .supportedLanguages
+                            .entries
+                            .toList()[index];
                         final languageCode = entry.key;
                         final languageData = entry.value;
                         final isSelected = _selectedLanguage == languageCode;
@@ -171,7 +184,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: AppColors.brandPrimary.withOpacity(0.3),
+                                            color: AppColors.brandPrimary
+                                                .withOpacity(0.3),
                                             blurRadius: 12,
                                             spreadRadius: 0,
                                           ),
@@ -199,7 +213,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                                     // Language name
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             languageData['nativeName'] ?? '',
@@ -224,7 +239,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                                     ),
                                     // Selection indicator
                                     AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
                                       width: 24,
                                       height: 24,
                                       decoration: BoxDecoration(
@@ -294,5 +311,3 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
     );
   }
 }
-
-

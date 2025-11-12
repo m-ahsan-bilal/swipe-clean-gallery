@@ -266,6 +266,114 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Affirmative action button text
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// Negative action button text
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// Title for onboarding welcome page
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to SnapBin Gallery'**
+  String get onboardingWelcomeTitle;
+
+  /// Subtitle for onboarding welcome page
+  ///
+  /// In en, this message translates to:
+  /// **'Your smart, animated gallery experience.'**
+  String get onboardingWelcomeSubtitle;
+
+  /// Title for onboarding swipe navigation page
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Your Gallery'**
+  String get onboardingSwipeTitle;
+
+  /// Subtitle for onboarding swipe navigation page
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to browse through your images and videos.'**
+  String get onboardingSwipeSubtitle;
+
+  /// Title for onboarding delete explanation page
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe Up to Delete'**
+  String get onboardingDeleteTitle;
+
+  /// Subtitle for onboarding delete explanation page
+  ///
+  /// In en, this message translates to:
+  /// **'A paper-fold animation sends your file to the bin — fast, clean, and fun!'**
+  String get onboardingDeleteSubtitle;
+
+  /// Title for onboarding bin management page
+  ///
+  /// In en, this message translates to:
+  /// **'Manage with a Tap'**
+  String get onboardingOrganizeTitle;
+
+  /// Subtitle for onboarding bin management page
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the bin icon to review or delete items permanently.'**
+  String get onboardingOrganizeSubtitle;
+
+  /// Skip button label on onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// Next button label on onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// Final button label on onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingDone;
+
+  /// Theme section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// Label describing theme toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get themeModeLabel;
+
+  /// Dark mode option label
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get themeDark;
+
+  /// Light mode option label
+  ///
+  /// In en, this message translates to:
+  /// **'Light mode'**
+  String get themeLight;
+
+  /// About section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
   /// Exit button text
   ///
   /// In en, this message translates to:
@@ -751,6 +859,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items queued for deletion'**
   String get queueEmpty;
+
+  /// Application name shown in About screen
+  ///
+  /// In en, this message translates to:
+  /// **'SwipeClean Gallery'**
+  String get aboutAppName;
+
+  /// Version text in About screen
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String aboutVersion(String version);
+
+  /// Main description of the app in About screen
+  ///
+  /// In en, this message translates to:
+  /// **'SwipeClean Gallery is designed to make cleaning up your media library effortless. Swipe through your photos and videos with fluid animations, queue up deletions, and enjoy celebratory effects when you clear space.'**
+  String get aboutDescription;
+
+  /// Key Features section title in About screen
+  ///
+  /// In en, this message translates to:
+  /// **'Key Features'**
+  String get aboutKeyFeatures;
+
+  /// First feature bullet point
+  ///
+  /// In en, this message translates to:
+  /// **'Tinder-style card stack to browse media one item at a time.'**
+  String get aboutFeature1;
+
+  /// Second feature bullet point
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe gestures for quick navigation and satisfying deletion animations.'**
+  String get aboutFeature2;
+
+  /// Third feature bullet point
+  ///
+  /// In en, this message translates to:
+  /// **'Localized experience with support for multiple languages and right-to-left layouts.'**
+  String get aboutFeature3;
+
+  /// Fourth feature bullet point
+  ///
+  /// In en, this message translates to:
+  /// **'Customizable themes so you can pick between light and dark modes.'**
+  String get aboutFeature4;
+
+  /// Closing message in About screen
+  ///
+  /// In en, this message translates to:
+  /// **'We built SwipeClean Gallery to combine performance, accessibility, and a bit of delight. Thank you for trying it out!'**
+  String get aboutClosing;
 }
 
 class _AppLocalizationsDelegate

@@ -137,6 +137,96 @@
     "description": "Cancel button text"
   },
   
+  "yes": "Yes",
+  "@yes": {
+    "description": "Affirmative action button text"
+  },
+
+  "no": "No",
+  "@no": {
+    "description": "Negative action button text"
+  },
+
+  "onboardingWelcomeTitle": "Welcome to SnapBin Gallery",
+  "@onboardingWelcomeTitle": {
+    "description": "Title for onboarding welcome page"
+  },
+
+  "onboardingWelcomeSubtitle": "Your smart, animated gallery experience.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtitle for onboarding welcome page"
+  },
+
+  "onboardingSwipeTitle": "Explore Your Gallery",
+  "@onboardingSwipeTitle": {
+    "description": "Title for onboarding swipe navigation page"
+  },
+
+  "onboardingSwipeSubtitle": "Swipe left or right to browse through your images and videos.",
+  "@onboardingSwipeSubtitle": {
+    "description": "Subtitle for onboarding swipe navigation page"
+  },
+
+  "onboardingDeleteTitle": "Swipe Up to Delete",
+  "@onboardingDeleteTitle": {
+    "description": "Title for onboarding delete explanation page"
+  },
+
+  "onboardingDeleteSubtitle": "A paper-fold animation sends your file to the bin — fast, clean, and fun!",
+  "@onboardingDeleteSubtitle": {
+    "description": "Subtitle for onboarding delete explanation page"
+  },
+
+  "onboardingOrganizeTitle": "Manage with a Tap",
+  "@onboardingOrganizeTitle": {
+    "description": "Title for onboarding bin management page"
+  },
+
+  "onboardingOrganizeSubtitle": "Tap the bin icon to review or delete items permanently.",
+  "@onboardingOrganizeSubtitle": {
+    "description": "Subtitle for onboarding bin management page"
+  },
+
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": {
+    "description": "Skip button label on onboarding"
+  },
+
+  "onboardingNext": "Next",
+  "@onboardingNext": {
+    "description": "Next button label on onboarding"
+  },
+
+  "onboardingDone": "Get Started",
+  "@onboardingDone": {
+    "description": "Final button label on onboarding"
+  },
+
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme section title in settings"
+  },
+
+  "themeModeLabel": "Theme mode",
+  "@themeModeLabel": {
+    "description": "Label describing theme toggle"
+  },
+
+  "themeDark": "Dark mode",
+  "@themeDark": {
+    "description": "Dark mode option label"
+  },
+
+  "themeLight": "Light mode",
+  "@themeLight": {
+    "description": "Light mode option label"
+  },
+
+  "about": "About",
+  "@about": {
+    "description": "About section title in settings"
+  },
+
   "exit": "Exit",
   "@exit": {
     "description": "Exit button text"
@@ -464,7 +554,56 @@
   
   "clearAll": "Clear All",
   "noMoreCards": "You've reached the end",
-  "queueEmpty": "No items queued for deletion"
+  "queueEmpty": "No items queued for deletion",
+  
+  "aboutAppName": "SwipeClean Gallery",
+  "@aboutAppName": {
+    "description": "Application name shown in About screen"
+  },
+  
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "description": "Version text in About screen",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "1.1.0"
+      }
+    }
+  },
+  
+  "aboutDescription": "SwipeClean Gallery is designed to make cleaning up your media library effortless. Swipe through your photos and videos with fluid animations, queue up deletions, and enjoy celebratory effects when you clear space.",
+  "@aboutDescription": {
+    "description": "Main description of the app in About screen"
+  },
+  
+  "aboutKeyFeatures": "Key Features",
+  "@aboutKeyFeatures": {
+    "description": "Key Features section title in About screen"
+  },
+  
+  "aboutFeature1": "Tinder-style card stack to browse media one item at a time.",
+  "@aboutFeature1": {
+    "description": "First feature bullet point"
+  },
+  
+  "aboutFeature2": "Swipe gestures for quick navigation and satisfying deletion animations.",
+  "@aboutFeature2": {
+    "description": "Second feature bullet point"
+  },
+  
+  "aboutFeature3": "Localized experience with support for multiple languages and right-to-left layouts.",
+  "@aboutFeature3": {
+    "description": "Third feature bullet point"
+  },
+  
+  "aboutFeature4": "Customizable themes so you can pick between light and dark modes.",
+  "@aboutFeature4": {
+    "description": "Fourth feature bullet point"
+  },
+  
+  "aboutClosing": "We built SwipeClean Gallery to combine performance, accessibility, and a bit of delight. Thank you for trying it out!",
+  "@aboutClosing": {
+    "description": "Closing message in About screen"
+  }
 }
-
-

@@ -95,6 +95,64 @@ class AppLocalizationsUr extends AppLocalizations {
   String get cancel => 'منسوخ کریں';
 
   @override
+  String get yes => 'ہاں';
+
+  @override
+  String get no => 'نہیں';
+
+  @override
+  String get onboardingWelcomeTitle => 'SnapBin Gallery میں خوش آمدید';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'آپ کا ذہین اور متحرک گیلری کا تجربہ۔';
+
+  @override
+  String get onboardingSwipeTitle => 'اپنی گیلری دریافت کریں';
+
+  @override
+  String get onboardingSwipeSubtitle =>
+      'اپنی تصاویر اور ویڈیوز دیکھنے کے لیے بائیں یا دائیں سوائپ کریں۔';
+
+  @override
+  String get onboardingDeleteTitle => 'حذف کرنے کے لیے اوپر سوائپ کریں';
+
+  @override
+  String get onboardingDeleteSubtitle =>
+      'کاغذ موڑنے والی اینیمیشن آپ کی فائل کو بین میں بھیجتی ہے — تیز، صاف اور دلچسپ!';
+
+  @override
+  String get onboardingOrganizeTitle => 'ایک ٹپ پر منظم کریں';
+
+  @override
+  String get onboardingOrganizeSubtitle =>
+      'آئٹمز کا جائزہ لینے یا مستقل طور پر حذف کرنے کے لیے بین آئیکون پر ٹیپ کریں۔';
+
+  @override
+  String get onboardingSkip => 'اسکپ کریں';
+
+  @override
+  String get onboardingNext => 'اگلا';
+
+  @override
+  String get onboardingDone => 'شروع کریں';
+
+  @override
+  String get theme => 'تھیم';
+
+  @override
+  String get themeModeLabel => 'تھیم موڈ';
+
+  @override
+  String get themeDark => 'ڈارک موڈ';
+
+  @override
+  String get themeLight => 'لائٹ موڈ';
+
+  @override
+  String get about => 'ہمارے بارے میں';
+
+  @override
   String get exit => 'باہر نکلیں';
 
   @override
@@ -360,4 +418,39 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get queueEmpty => 'حذف کرنے کے لیے کوئی آئٹم منتخب نہیں';
+
+  @override
+  String get aboutAppName => 'سوائپ کلین گیلری';
+
+  @override
+  String aboutVersion(String version) {
+    return 'ورژن $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'سوائپ کلین گیلری آپ کی میڈیا لائبریری کو صاف کرنے کو آسان بنانے کے لیے ڈیزائن کی گئی ہے۔ روانی انیمیشن کے ساتھ اپنی تصاویر اور ویڈیوز کے ذریعے سوائپ کریں، حذف کرنے کے لیے قطار میں لگائیں، اور جب آپ جگہ صاف کرتے ہیں تو جشن کے اثرات سے لطف اندوز ہوں۔';
+
+  @override
+  String get aboutKeyFeatures => 'اہم خصوصیات';
+
+  @override
+  String get aboutFeature1 =>
+      'ایک وقت میں ایک میڈیا آئٹم براؤز کرنے کے لیے ٹنڈر طرز کا کارڈ اسٹیک۔';
+
+  @override
+  String get aboutFeature2 =>
+      'تیز نیویگیشن اور اطمینان بخش حذف کرنے کی انیمیشنز کے لیے سوائپ اشارے۔';
+
+  @override
+  String get aboutFeature3 =>
+      'متعدد زبانوں اور دائیں سے بائیں ترتیب کی حمایت کے ساتھ مقامی تجربہ۔';
+
+  @override
+  String get aboutFeature4 =>
+      'حسب ضرورت تھیمز تاکہ آپ ہلکے اور گہرے موڈز میں سے انتخاب کر سکیں۔';
+
+  @override
+  String get aboutClosing =>
+      'ہم نے کارکردگی، رسائی، اور تھوڑی سی خوشی کو یکجا کرنے کے لیے سوائپ کلین گیلری بنائی۔ اسے آزمانے کا شکریہ!';
 }

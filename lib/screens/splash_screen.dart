@@ -1,6 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipe_clean_gallery/screens/gallery_screen.dart';
+import 'package:swipe_clean_gallery/screens/onboarding_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
 import 'package:swipe_clean_gallery/services/permission_service.dart';
@@ -46,6 +50,27 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
+    // Check if onboarding is completed
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+
+    if (!mounted) return;
+
+    // If onboarding not completed, navigate to onboarding screen
+    if (!onboardingCompleted) {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const OnboardingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+      return;
+    }
+
     // Check if permissions are already granted
     final hasPermissions = await PermissionService.hasAllPermissions();
 
@@ -88,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: AnimatedBuilder(
@@ -141,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.photo_library_rounded,
                                 size: 80,
                                 color: AppColors.brandPrimary,
@@ -201,7 +226,7 @@ class _SplashScreenState extends State<SplashScreen>
                             return Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.swipe_up,
                                   color: AppColors.brandPrimary,
                                   size: 36,

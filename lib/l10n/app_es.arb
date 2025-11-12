@@ -115,5 +115,105 @@
   "unableToPlayVideo": "No se puede reproducir el video: {error}",
   "clearAll": "Borrar todo",
   "noMoreCards": "Has llegado al final",
-  "queueEmpty": "No hay elementos pendientes por eliminar"
+  "queueEmpty": "No hay elementos pendientes por eliminar",
+
+  "yes": "Sí",
+  "@yes": {
+    "description": "Botón para confirmar"
+  },
+
+  "no": "No",
+  "@no": {
+    "description": "Botón para rechazar"
+  },
+
+  "onboardingWelcomeTitle": "Bienvenido a SnapBin Gallery",
+  "@onboardingWelcomeTitle": {
+    "description": "Título de la pantalla de bienvenida"
+  },
+
+  "onboardingWelcomeSubtitle": "Tu experiencia de galería inteligente y animada.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtítulo de la pantalla de bienvenida"
+  },
+
+  "onboardingSwipeTitle": "Explora tu galería",
+  "@onboardingSwipeTitle": {
+    "description": "Título para la pantalla de navegación por gestos"
+  },
+
+  "onboardingSwipeSubtitle": "Desliza a la izquierda o derecha para navegar por tus fotos y videos.",
+  "@onboardingSwipeSubtitle": {
+    "description": "Subtítulo para la pantalla de navegación por gestos"
+  },
+
+  "onboardingDeleteTitle": "Desliza hacia arriba para eliminar",
+  "@onboardingDeleteTitle": {
+    "description": "Título para la pantalla de borrado"
+  },
+
+  "onboardingDeleteSubtitle": "Una animación de papel plegado envía tu archivo al contenedor: rápido, limpio y divertido.",
+  "@onboardingDeleteSubtitle": {
+    "description": "Subtítulo para la pantalla de borrado"
+  },
+
+  "onboardingOrganizeTitle": "Mantente organizado",
+  "@onboardingOrganizeTitle": {
+    "description": "Título para la pantalla de organización"
+  },
+
+  "onboardingOrganizeSubtitle": "Toca el ícono del contenedor para revisar o eliminar elementos permanentemente.",
+  "@onboardingOrganizeSubtitle": {
+    "description": "Subtítulo para la pantalla de organización"
+  },
+
+  "onboardingSkip": "Saltar",
+  "@onboardingSkip": {
+    "description": "Texto del botón saltar"
+  },
+
+  "onboardingNext": "Siguiente",
+  "@onboardingNext": {
+    "description": "Texto del botón siguiente"
+  },
+
+  "onboardingDone": "Empezar",
+  "@onboardingDone": {
+    "description": "Texto del botón finalizar onboarding"
+  },
+
+  "theme": "Tema",
+  "@theme": {
+    "description": "Título de la sección de tema en ajustes"
+  },
+
+  "themeModeLabel": "Modo de tema",
+  "@themeModeLabel": {
+    "description": "Etiqueta del interruptor de tema"
+  },
+
+  "themeDark": "Modo oscuro",
+  "@themeDark": {
+    "description": "Opción para modo oscuro"
+  },
+
+  "themeLight": "Modo claro",
+  "@themeLight": {
+    "description": "Opción para modo claro"
+  },
+
+  "about": "Acerca de",
+  "@about": {
+    "description": "Título de la sección de información"
+  },
+
+  "aboutAppName": "SwipeClean Galería",
+  "aboutVersion": "Versión {version}",
+  "aboutDescription": "SwipeClean Galería está diseñada para hacer que limpiar tu biblioteca multimedia sea sin esfuerzo. Desliza a través de tus fotos y videos con animaciones fluidas, ponlos en cola para eliminar y disfruta de efectos de celebración cuando liberes espacio.",
+  "aboutKeyFeatures": "Características principales",
+  "aboutFeature1": "Pila de tarjetas estilo Tinder para explorar medios de uno en uno.",
+  "aboutFeature2": "Gestos de deslizamiento para navegación rápida y animaciones de eliminación satisfactorias.",
+  "aboutFeature3": "Experiencia localizada con soporte para múltiples idiomas y diseños de derecha a izquierda.",
+  "aboutFeature4": "Temas personalizables para que puedas elegir entre modos claro y oscuro.",
+  "aboutClosing": "Construimos SwipeClean Galería para combinar rendimiento, accesibilidad y un poco de alegría. ¡Gracias por probarlo!"
 }

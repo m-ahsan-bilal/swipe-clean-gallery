@@ -115,5 +115,105 @@
   "unableToPlayVideo": "वीडियो चलाने में असमर्थ: {error}",
   "clearAll": "सभी साफ़ करें",
   "noMoreCards": "आप अंत तक पहुँच गए हैं",
-  "queueEmpty": "हटाने के लिए कोई आइटम लंबित नहीं है"
+  "queueEmpty": "हटाने के लिए कोई आइटम लंबित नहीं है",
+
+  "yes": "हाँ",
+  "@yes": {
+    "description": "स्वीकृति बटन का पाठ"
+  },
+
+  "no": "नहीं",
+  "@no": {
+    "description": "अस्वीकृति बटन का पाठ"
+  },
+
+  "onboardingWelcomeTitle": "SnapBin Gallery में आपका स्वागत है",
+  "@onboardingWelcomeTitle": {
+    "description": "ऑनबोर्डिंग स्वागत पृष्ठ का शीर्षक"
+  },
+
+  "onboardingWelcomeSubtitle": "आपका स्मार्ट और एनिमेटेड गैलरी अनुभव।",
+  "@onboardingWelcomeSubtitle": {
+    "description": "स्वागत पृष्ठ का उपशीर्षक"
+  },
+
+  "onboardingSwipeTitle": "अपनी गैलरी खोजें",
+  "@onboardingSwipeTitle": {
+    "description": "स्वाइप पृष्ठ का शीर्षक"
+  },
+
+  "onboardingSwipeSubtitle": "अपनी तस्वीरों और वीडियो को देखने के लिए बाएँ या दाएँ स्वाइप करें।",
+  "@onboardingSwipeSubtitle": {
+    "description": "स्वाइप पृष्ठ का उपशीर्षक"
+  },
+
+  "onboardingDeleteTitle": "हटाने के लिए ऊपर स्वाइप करें",
+  "@onboardingDeleteTitle": {
+    "description": "हटाने वाले पृष्ठ का शीर्षक"
+  },
+
+  "onboardingDeleteSubtitle": "पेपर-फोल्ड एनीमेशन आपकी फ़ाइल को डस्टबिन में भेजता है — तेज़, साफ़ और मज़ेदार!",
+  "@onboardingDeleteSubtitle": {
+    "description": "हटाने वाले पृष्ठ का उपशीर्षक"
+  },
+
+  "onboardingOrganizeTitle": "एक टैप में व्यवस्थित करें",
+  "@onboardingOrganizeTitle": {
+    "description": "व्यवस्थित करने वाले पृष्ठ का शीर्षक"
+  },
+
+  "onboardingOrganizeSubtitle": "आइटम की समीक्षा या स्थायी रूप से हटाने के लिए बिन आइकन पर टैप करें।",
+  "@onboardingOrganizeSubtitle": {
+    "description": "व्यवस्थित करने वाले पृष्ठ का उपशीर्षक"
+  },
+
+  "onboardingSkip": "छोड़ें",
+  "@onboardingSkip": {
+    "description": "ऑनबोर्डिंग छोड़ने का बटन"
+  },
+
+  "onboardingNext": "आगे",
+  "@onboardingNext": {
+    "description": "अगले पृष्ठ का बटन"
+  },
+
+  "onboardingDone": "शुरू करें",
+  "@onboardingDone": {
+    "description": "ऑनबोर्डिंग समाप्त करने का बटन"
+  },
+
+  "theme": "थीम",
+  "@theme": {
+    "description": "सेटिंग्स में थीम शीर्षक"
+  },
+
+  "themeModeLabel": "थीम मोड",
+  "@themeModeLabel": {
+    "description": "थीम स्विच का लेबल"
+  },
+
+  "themeDark": "डार्क मोड",
+  "@themeDark": {
+    "description": "डार्क मोड विकल्प"
+  },
+
+  "themeLight": "लाइट मोड",
+  "@themeLight": {
+    "description": "लाइट मोड विकल्प"
+  },
+
+  "about": "हमारे बारे में",
+  "@about": {
+    "description": "सेटिंग्स में अबाउट सेक्शन शीर्षक"
+  },
+
+  "aboutAppName": "स्वाइप क्लीन गैलरी",
+  "aboutVersion": "संस्करण {version}",
+  "aboutDescription": "स्वाइप क्लीन गैलरी आपकी मीडिया लाइब्रेरी को साफ करने को आसान बनाने के लिए डिज़ाइन की गई है। तरल एनिमेशन के साथ अपनी तस्वीरों और वीडियो के माध्यम से स्वाइप करें, हटाने के लिए कतारबद्ध करें, और जब आप स्थान साफ करते हैं तो उत्सव के प्रभावों का आनंद लें।",
+  "aboutKeyFeatures": "मुख्य विशेषताएं",
+  "aboutFeature1": "एक समय में एक मीडिया आइटम ब्राउज़ करने के लिए टिंडर-शैली का कार्ड स्टैक।",
+  "aboutFeature2": "त्वरित नेविगेशन और संतोषजनक हटाने एनिमेशन के लिए स्वाइप जेस्चर।",
+  "aboutFeature3": "कई भाषाओं और दाएं से बाएं लेआउट के समर्थन के साथ स्थानीयकृत अनुभव।",
+  "aboutFeature4": "अनुकूलन योग्य थीम ताकि आप हल्के और गहरे मोड के बीच चुन सकें।",
+  "aboutClosing": "हमने प्रदर्शन, पहुंच, और थोड़ी सी खुशी को संयोजित करने के लिए स्वाइप क्लीन गैलरी बनाई। इसे आजमाने के लिए धन्यवाद!"
 }

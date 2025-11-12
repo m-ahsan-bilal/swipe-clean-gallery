@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, duplicate_ignore, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import '../services/permission_service.dart';
@@ -10,7 +12,8 @@ class PermissionScreen extends StatefulWidget {
   State<PermissionScreen> createState() => _PermissionScreenState();
 }
 
-class _PermissionScreenState extends State<PermissionScreen> with WidgetsBindingObserver {
+class _PermissionScreenState extends State<PermissionScreen>
+    with WidgetsBindingObserver {
   bool _isPermissionDenied = false;
   bool _isLoading = false;
 
@@ -38,7 +41,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   Future<void> _checkPermissions() async {
     final hasPermission = await PermissionService.hasAllPermissions();
     if (!mounted) return;
-    
+
     if (hasPermission) {
       // Navigate to gallery if permissions are granted
       Navigator.of(context).pushReplacement(
@@ -52,20 +55,20 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
 
   Future<void> _requestPermission() async {
     setState(() => _isLoading = true);
-    
+
     final status = await PermissionService.requestPermission(context);
-    
+
     if (!mounted) return;
-    
+
     setState(() => _isLoading = false);
 
     // After permission request, wait a moment and check again
     // This handles the case where user granted permission in settings
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
-    
+
     final hasAllPermissions = await PermissionService.hasAllPermissions();
-    
+
     if (hasAllPermissions) {
       // Navigate to gallery if all permissions are now granted
       if (mounted) {
@@ -79,7 +82,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
         // Navigate to gallery
         PermissionService.navigateToGallery(context);
         break;
-      
+
       case PermissionStatus.denied:
       case PermissionStatus.permanentlyDenied:
         // Show error state with instructions
@@ -88,7 +91,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
           _showDeniedInstructions();
         }
         break;
-      
+
       case PermissionStatus.limited:
         // Show dialog explaining full access is needed
         if (mounted) {
@@ -161,14 +164,18 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    _isPermissionDenied ? l10n.permissionRequired : l10n.accessYourPhotos,
+                    _isPermissionDenied
+                        ? l10n.permissionRequired
+                        : l10n.accessYourPhotos,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontWeight: FontWeight.w700,
                       fontSize: 24,
                       height: 1.25,
-                      color: _isPermissionDenied ? Colors.red[300] : Colors.white,
+                      color: _isPermissionDenied
+                          ? Colors.red[300]
+                          : Colors.white,
                     ),
                   ),
                   Padding(
@@ -196,6 +203,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
@@ -235,23 +243,25 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isPermissionDenied 
-                          ? Colors.red[700] 
+                      backgroundColor: _isPermissionDenied
+                          ? Colors.red[700]
                           : const Color(0xFF0A8AFF),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
-                    onPressed: _isLoading ? null : () async {
-                      if (_isPermissionDenied) {
-                        // Open app settings
-                        await PermissionService.openAppSettings();
-                      } else {
-                        // Request permission
-                        await _requestPermission();
-                      }
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            if (_isPermissionDenied) {
+                              // Open app settings
+                              await PermissionService.openAppSettings();
+                            } else {
+                              // Request permission
+                              await _requestPermission();
+                            }
+                          },
                     child: _isLoading
                         ? const SizedBox(
                             height: 20,
@@ -262,7 +272,9 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                             ),
                           )
                         : Text(
-                            _isPermissionDenied ? l10n.openSettings : l10n.allowAccess,
+                            _isPermissionDenied
+                                ? l10n.openSettings
+                                : l10n.allowAccess,
                             style: const TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
                               fontWeight: FontWeight.w700,

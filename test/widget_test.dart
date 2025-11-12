@@ -10,14 +10,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:swipe_clean_gallery/main.dart';
 import 'package:swipe_clean_gallery/services/localization_service.dart';
+import 'package:swipe_clean_gallery/services/theme_service.dart';
 
 void main() {
   testWidgets('App launches successfully', (WidgetTester tester) async {
-    // Create localization service for testing
+    // Create services for testing
     final localizationService = LocalizationService();
+    final themeService = ThemeService();
     
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(localizationService: localizationService));
+    await tester.pumpWidget(MyApp(
+      localizationService: localizationService,
+      themeService: themeService,
+    ));
 
     // Verify that app builds successfully
     expect(find.byType(MaterialApp), findsOneWidget);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:swipe_clean_gallery/services/recently_deleted_service.dart';
 import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 
 class GalleryService {
@@ -10,9 +9,8 @@ class GalleryService {
   int currentPage = 0;
   static const int pageSize = 100;
   AssetPathEntity? _cachedAlbum;
-  final RecentlyDeletedService _deletedService;
 
-  GalleryService(this._deletedService);
+  GalleryService();
 
   Future<void> initGallery() async {
     try {
@@ -23,10 +21,6 @@ class GalleryService {
       groupedImages.clear();
       currentPage = 0;
       _cachedAlbum = null;
-
-      // Reload deleted items from storage
-      await _deletedService.loadDeletedItems();
-      debugPrint("Loaded ${_deletedService.count} recently deleted items");
 
       // Request permissions with proper Android options
       final PermissionState ps = await PhotoManager.requestPermissionExtend(
@@ -119,24 +113,12 @@ class GalleryService {
       debugPrint("Fetched ${newImages.length} items from page $currentPage");
 
       if (newImages.isNotEmpty) {
-        // Filter out deleted items
-        final deletedIds = _deletedService.getDeletedIds();
-        final filteredImages = newImages
-            .where((asset) => !deletedIds.contains(asset.id))
-            .toList();
-
-        debugPrint(
-          "🗑️ Filtered out ${newImages.length - filteredImages.length} deleted items",
-        );
-
-        if (filteredImages.isNotEmpty) {
-          allImages.addAll(filteredImages);
-          _groupImages(filteredImages); // Context will be added when screen rebuilds
-        }
+        allImages.addAll(newImages);
+        _groupImages(newImages); // Context will be added when screen rebuilds
 
         currentPage++;
         debugPrint(
-          "Loaded ${filteredImages.length} items. Total: ${allImages.length}",
+          "Loaded ${newImages.length} items. Total: ${allImages.length}",
         );
         debugPrint("Grouped into ${groupedImages.length} sections");
       } else {

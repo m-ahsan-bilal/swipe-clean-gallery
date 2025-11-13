@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -171,6 +171,7 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   void _syncCardAssets({required bool resetIndex}) {
     final pendingIds = _pendingDeletionQueue.map((asset) => asset.id).toSet();
+    // Sort DESCENDING = newest first
     final sorted = List<AssetEntity>.from(_galleryService.allImages)
       ..sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
     final filtered = sorted
@@ -187,7 +188,7 @@ class _GalleryScreenState extends State<GalleryScreen>
       }
 
       if (resetIndex || _topCardIndex >= _cardAssets.length) {
-        _topCardIndex = 0;
+        _topCardIndex = 0; // Start at most recent (index 0)
       } else {
         final currentId = _cardAssets[_topCardIndex].id;
         final newIndex = _cardAssets.indexWhere(
@@ -218,15 +219,8 @@ class _GalleryScreenState extends State<GalleryScreen>
       _galleryService.updateGroupingWithContext(context);
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        if (didPop) return;
-        final shouldExit = await _onWillPop();
-        if (shouldExit && context.mounted) {
-          Navigator.of(context).pop();
-        }
-      },
+    return WillPopScope(
+      onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: AppColors.backgroundPrimary,
         appBar: AppBar(
@@ -479,6 +473,68 @@ class _GalleryScreenState extends State<GalleryScreen>
     );
   }
 
+  // Future<bool> _onWillPop() async {
+  //   final l10n = AppLocalizations.of(context)!;
+  //   final hasDeletedImages = _totalDeletedCount > 0;
+
+  //   final shouldExit = await showDialog<bool>(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //       title: Text(l10n.exitGallery),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Image.asset(
+  //             hasDeletedImages
+  //                 ? 'assets/images/happy.png'
+  //                 : 'assets/images/sad.png',
+  //             height: 120,
+  //             fit: BoxFit.contain,
+  //             errorBuilder: (_, __, ___) => Icon(
+  //               hasDeletedImages ? Icons.celebration : Icons.mood_bad,
+  //               size: 80,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             hasDeletedImages
+  //                 ? l10n.freedUpSpace
+  //                 : l10n.exitWithoutCleaningMessage,
+  //             textAlign: TextAlign.center,
+  //           ),
+  //           if (hasDeletedImages)
+  //             Padding(
+  //               padding: const EdgeInsets.only(top: 8),
+  //               child: Text(
+  //                 l10n.filesDeleted(
+  //                   _totalDeletedCount,
+  //                   _totalDeletedCount > 1 ? 's' : '',
+  //                 ),
+  //                 style: TextStyle(
+  //                   fontSize: 14,
+  //                   fontWeight: FontWeight.w600,
+  //                   color: Theme.of(context).colorScheme.primary,
+  //                 ),
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context, false),
+  //           child: Text(l10n.cancel),
+  //         ),
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context, true),
+  //           child: Text(l10n.exit, style: const TextStyle(color: Colors.red)),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  //   return shouldExit ?? false;
+  // }
   Future<bool> _onWillPop() async {
     final l10n = AppLocalizations.of(context)!;
     final hasDeletedImages = _totalDeletedCount > 0;
@@ -539,7 +595,16 @@ class _GalleryScreenState extends State<GalleryScreen>
         ],
       ),
     );
-    return shouldExit ?? false;
+
+    if (shouldExit == true) {
+      // Closes the app properly (avoids black screen)
+      Future.delayed(const Duration(milliseconds: 200), () {
+        Navigator.pop(context);
+      });
+      return true;
+    }
+
+    return false;
   }
 
   Widget _buildBlurOverlay() {
@@ -560,16 +625,17 @@ class _GalleryScreenState extends State<GalleryScreen>
       alignment: Alignment.center,
       child: SizedBox(
         width: stackWidth,
-        height: stackHeight + 200,
+        height: stackHeight + 280,
         child: Stack(
-          alignment: Alignment.topCenter,
+          clipBehavior: Clip.none,
+          alignment: Alignment.bottomCenter, // 👈 Changed to bottom
           children: [
-            Positioned(top: 0, child: _buildBinButton(l10n)),
+            Positioned(top: 20, child: _buildBinButton(l10n)),
             Positioned(
-              top: 88,
+              top: 0,
               left: 0,
               right: 0,
-              bottom: 0,
+              bottom: 68,
               child: _buildCardDeck(l10n, stackWidth, stackHeight),
             ),
           ],
@@ -721,55 +787,49 @@ class _GalleryScreenState extends State<GalleryScreen>
       );
     }
 
-    // Show 4 cards in stack for better depth perception
-    final depth = 4;
+    // Show 3 cards stacked upward from bottom
+    final depth = 3;
     final widgets = <Widget>[];
     final maxDepth = math.min(depth, _cardAssets.length - _topCardIndex);
 
-    for (int i = maxDepth - 1; i >= 0; i--) {
+    for (int i = 0; i < maxDepth; i++) {
       final cardIndex = _topCardIndex + i;
       if (cardIndex >= _cardAssets.length) continue;
       final asset = _cardAssets[cardIndex];
       final depthIndex = i;
-      final isTop = depthIndex == 0;
+      final isTop = depthIndex == maxDepth - 1;
 
-      final offsetY = -depthIndex * 45.0;
-      final scale = 1 - depthIndex * 0.06;
-      final opacity = math.max(0.5, 1 - depthIndex * 0.12);
+      // Cards rise upward from the bottom
+      final verticalOffset = depthIndex * 20.0;
+      final scale = 1 - (maxDepth - 1 - depthIndex) * 0.04;
+      final horizontalPadding = (maxDepth - 1 - depthIndex) * 4.0;
 
       widgets.add(
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: offsetY,
-          top: 0,
+          left: horizontalPadding,
+          right: horizontalPadding,
+          bottom: verticalOffset,
           child: Transform.scale(
             scale: scale,
-            alignment: Alignment.bottomCenter,
-            child: Opacity(
-              opacity: opacity,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: isTop
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, -4),
-                          ),
-                        ],
-                ),
+            alignment: Alignment.center,
+            child: Container(
+              height: height,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 15 + (depthIndex * 5),
+                    spreadRadius: 1,
+                    offset: Offset(0, 4 + depthIndex * 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
                 child: isTop
                     ? _buildInteractiveCard(asset, width, height)
-                    : ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: depthIndex * 1.2,
-                          sigmaY: depthIndex * 1.2,
-                        ),
-                        child: _buildStaticCard(asset, width, height),
-                      ),
+                    : _buildStaticCard(asset, width, height),
               ),
             ),
           ),
@@ -777,7 +837,11 @@ class _GalleryScreenState extends State<GalleryScreen>
       );
     }
 
-    return Stack(children: widgets);
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.bottomCenter,
+      children: widgets,
+    );
   }
 
   Widget _buildInteractiveCard(AssetEntity asset, double width, double height) {
@@ -808,7 +872,20 @@ class _GalleryScreenState extends State<GalleryScreen>
             angle: _cardRotation + introRotation,
             child: Transform.scale(
               scale: introScale,
-              child: _buildCardSurface(asset),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: _buildCardSurface(asset),
+              ),
             ),
           ),
         ),
@@ -822,28 +899,28 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Widget _buildCardSurface(AssetEntity asset) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1a1a1a), Color(0xFF0a0a0a)],
-        ),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Stack(
-        fit: StackFit.passthrough,
+        fit: StackFit.expand,
         children: [
-          AssetEntityImage(
-            asset,
-            isOriginal: false,
-            thumbnailSize: const ThumbnailSize.square(1200),
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Container(
-              color: Colors.grey[850],
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.broken_image_outlined,
-                color: Colors.grey,
-                size: 48,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: AssetEntityImage(
+              asset,
+              isOriginal: false,
+              thumbnailSize: const ThumbnailSize.square(1200),
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Container(
+                color: Colors.grey[850],
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.grey,
+                  size: 48,
+                ),
               ),
             ),
           ),
@@ -907,6 +984,7 @@ class _GalleryScreenState extends State<GalleryScreen>
     final l10n = AppLocalizations.of(context)!;
     switch (direction) {
       case _SwipeDirection.left:
+        // Swipe left = go to OLDER photos (increase index)
         if (_topCardIndex < _cardAssets.length - 1) {
           setState(() {
             _topCardIndex++;
@@ -919,7 +997,9 @@ class _GalleryScreenState extends State<GalleryScreen>
           _resetCardPosition();
         }
         break;
+
       case _SwipeDirection.right:
+        // Swipe right = go to NEWER photos (decrease index)
         if (_topCardIndex > 0) {
           setState(() {
             _topCardIndex--;
@@ -927,10 +1007,12 @@ class _GalleryScreenState extends State<GalleryScreen>
             _cardRotation = 0.0;
           });
         } else {
-          _showSnack(l10n.noMoreCards);
+          // Already at the most recent photo (index 0)
+          _showSnack('Already at most recent photo');
           _resetCardPosition();
         }
         break;
+
       case _SwipeDirection.up:
         final asset = _cardAssets[_topCardIndex];
         if (!_pendingDeletionQueue.any((item) => item.id == asset.id)) {

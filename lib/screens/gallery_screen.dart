@@ -79,12 +79,10 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Future<void> _checkPermissionsOnResume() async {
-    // Import the permission service at the top of the file
     final hasPermission = await _hasAllPermissions();
     if (!mounted) return;
 
     if (!hasPermission) {
-      // Navigate back to permission screen if permissions were revoked
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const PermissionScreen()),
       );
@@ -100,11 +98,9 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   void _loadBannerAd() {
     _bannerAd = BannerAd(
-      // adUnitId: AdHelper.bannerAdUnitId,
       adUnitId: 'ca-app-pub-3940256099942544/6300978111',
       size: AdSize.banner,
       request: const AdRequest(),
-
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           if (mounted) {
@@ -222,8 +218,15 @@ class _GalleryScreenState extends State<GalleryScreen>
       _galleryService.updateGroupingWithContext(context);
     }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+        final shouldExit = await _onWillPop();
+        if (shouldExit && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         backgroundColor: AppColors.backgroundPrimary,
         appBar: AppBar(
@@ -510,7 +513,10 @@ class _GalleryScreenState extends State<GalleryScreen>
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  '$_totalDeletedCount ${_totalDeletedCount > 1 ? l10n.filesDeleted(_totalDeletedCount, 's') : l10n.filesDeleted(_totalDeletedCount, '')}',
+                  l10n.filesDeleted(
+                    _totalDeletedCount,
+                    _totalDeletedCount > 1 ? 's' : '',
+                  ),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -547,14 +553,14 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Widget _buildCardStackArea(AppLocalizations l10n) {
     final size = MediaQuery.of(context).size;
-    final stackWidth = math.min(460.0, size.width * 0.92);
-    final stackHeight = math.min(size.height * 0.72, stackWidth * 1.25);
+    final stackWidth = math.min(350.0, size.width * 0.78);
+    final stackHeight = math.min(size.height * .92, stackWidth * 1.3);
 
     return Align(
       alignment: Alignment.center,
       child: SizedBox(
         width: stackWidth,
-        height: stackHeight + 120,
+        height: stackHeight + 200,
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
@@ -727,34 +733,29 @@ class _GalleryScreenState extends State<GalleryScreen>
       final depthIndex = i;
       final isTop = depthIndex == 0;
 
-      // Pronounced stacking effect - cards clearly visible beneath
-      final offsetY = -depthIndex * 45.0; // Larger offset for visible stack
-      final scale = 1 - depthIndex * 0.06; // More pronounced scale change
-      final opacity = math.max(
-        0.5,
-        1 - depthIndex * 0.12,
-      ); // Maintain visibility
+      final offsetY = -depthIndex * 45.0;
+      final scale = 1 - depthIndex * 0.06;
+      final opacity = math.max(0.5, 1 - depthIndex * 0.12);
 
       widgets.add(
         Positioned(
           left: 0,
           right: 0,
-          bottom: offsetY, // Position from bottom to show stack beneath
+          bottom: offsetY,
           top: 0,
           child: Transform.scale(
             scale: scale,
-            alignment: Alignment.bottomCenter, // Scale from bottom
+            alignment: Alignment.bottomCenter,
             child: Opacity(
               opacity: opacity,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  // Add subtle shadow between cards for depth
                   boxShadow: isTop
                       ? null
                       : [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withOpacity(0.2),
                             blurRadius: 8,
                             offset: const Offset(0, -4),
                           ),
@@ -821,19 +822,16 @@ class _GalleryScreenState extends State<GalleryScreen>
 
   Widget _buildCardSurface(AssetEntity asset) {
     return Container(
-      decoration: BoxDecoration(
-        // borderRadius: BorderRadius.circular(30),
-        // Gradient background for better image display
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF1a1a1a), Color(0xFF0a0a0a)],
         ),
       ),
       child: Stack(
-        fit: StackFit.expand,
+        fit: StackFit.passthrough,
         children: [
-          // Use contain to show complete image without cropping
           AssetEntityImage(
             asset,
             isOriginal: false,
@@ -849,35 +847,17 @@ class _GalleryScreenState extends State<GalleryScreen>
               ),
             ),
           ),
-          // Add subtle gradient overlay at bottom for stack visibility
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 100,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
+
           if (asset.type == AssetType.video)
             Center(
               child: Container(
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.45),
+                  color: Colors.black.withOpacity(0.45),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
+                    color: Colors.white.withOpacity(0.25),
                     width: 2,
                   ),
                 ),
@@ -1040,7 +1020,6 @@ class _GalleryScreenState extends State<GalleryScreen>
       barrierLabel: 'fireworks',
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) {
-        // Use a simple scale/opacity animation to avoid network-dependent errors.
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
@@ -1051,8 +1030,8 @@ class _GalleryScreenState extends State<GalleryScreen>
               child: Transform.scale(scale: scale, child: child),
             );
           },
-          child: Center(
-            child: const SizedBox(
+          child: const Center(
+            child: SizedBox(
               width: 280,
               height: 280,
               child: _FireworksCelebration(),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "847539213584",
+    "project_id": "swipe-clean-gallery-7799e",
+    "storage_bucket": "swipe-clean-gallery-7799e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847539213584:android:1c3d5de6e33e89a7850195",
+        "android_client_info": {
+          "package_name": "com.example.swipe_clean_gallery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUWAeZrbvavHvzZEQFFL9boZf4ASIq9xQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

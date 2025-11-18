@@ -1,5 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:ui';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -13,14 +18,35 @@ import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize the Mobile Ads SDK
-  await MobileAds.instance.initialize();
+  // Initialize Firebase with error handling
+  try {
+    await Firebase.initializeApp();
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+    // Continue app execution even if Firebase fails
+  }
 
-  // 👇 Add your device as a test device
-  RequestConfiguration configuration = RequestConfiguration(
-    testDeviceIds: ['E4AFC181484798EFEE831B49363CA387'],
-  );
-  MobileAds.instance.updateRequestConfiguration(configuration);
+  // Initialize the Mobile Ads SDK
+  try {
+    await MobileAds.instance.initialize();
+
+    // Add your device as a test device
+    RequestConfiguration configuration = RequestConfiguration(
+      testDeviceIds: ['E4AFC181484798EFEE831B49363CA387'],
+    );
+    MobileAds.instance.updateRequestConfiguration(configuration);
+  } catch (e) {
+    debugPrint('Ads initialization error: $e');
+    // Continue app execution even if ads fail
+  }
 
   // Initialize services
   final localizationService = LocalizationService();

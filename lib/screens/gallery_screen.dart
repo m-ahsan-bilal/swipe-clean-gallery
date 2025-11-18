@@ -3,20 +3,17 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
+import 'package:swipe_clean_gallery/viewmodels/gallery_viewmodel.dart';
 import 'package:swipe_clean_gallery/l10n/app_localizations.dart';
 import 'package:swipe_clean_gallery/screens/about_us_screen.dart';
 import 'package:swipe_clean_gallery/screens/permission_screen.dart';
 import 'package:swipe_clean_gallery/screens/settings_screen.dart';
 import 'package:swipe_clean_gallery/services/app_colors.dart';
-import 'package:swipe_clean_gallery/services/gallery_service.dart';
-
-enum _SwipeDirection { left, right, up }
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -27,52 +24,39 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
-  late GalleryService _galleryService;
+  late GalleryViewModel _viewModel;
 
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  bool _isInitializing = true;
-  bool _isRefreshing = false;
-  bool _hasPlayedIntro = false;
 
   late AnimationController _introController;
-
-  final List<AssetEntity> _pendingDeletionQueue = [];
-  List<AssetEntity> _cardAssets = [];
-  int _topCardIndex = 0;
-  Offset _cardOffset = Offset.zero;
-  double _cardRotation = 0.0;
-  int _totalDeletedCount = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    _viewModel = GalleryViewModel();
     _introController =
         AnimationController(
             vsync: this,
             duration: const Duration(milliseconds: 2000),
           )
           ..addListener(() {
-            if (mounted) {
-              setState(() {});
-            }
+            if (mounted) setState(() {});
           })
           ..addStatusListener((status) {
             if (status == AnimationStatus.completed) {
-              setState(() {
-                _hasPlayedIntro = true;
-              });
+              _viewModel.setHasPlayedIntro(true);
             }
           });
-    _galleryService = GalleryService();
+
     _initGallery();
     _loadBannerAd();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Check permissions when app resumes
     if (state == AppLifecycleState.resumed) {
       _checkPermissionsOnResume();
     }
@@ -103,9 +87,7 @@ class _GalleryScreenState extends State<GalleryScreen>
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          if (mounted) {
-            setState(() => _isBannerAdLoaded = true);
-          }
+          if (mounted) setState(() => _isBannerAdLoaded = true);
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint("Ad failed: ${error.message}");
@@ -116,39 +98,16 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Future<void> _initGallery({bool playIntro = true}) async {
-    // Prevent multiple simultaneous calls
-    if (_isRefreshing) {
-      debugPrint("⏭️ Already refreshing, skipping...");
-      return;
-    }
-
     try {
-      _isRefreshing = true;
-      setState(() => _isInitializing = true);
+      await _viewModel.initGallery(playIntro: playIntro);
 
-      await _galleryService.initGallery();
-
-      if (mounted) {
-        _pendingDeletionQueue.clear();
-        _cardOffset = Offset.zero;
-        _cardRotation = 0.0;
-        // Only reset intro animation if explicitly requested
-        if (playIntro) {
-          _hasPlayedIntro = false;
-        }
-        setState(() => _isInitializing = false);
-        _syncCardAssets(resetIndex: true);
-        if (_cardAssets.isNotEmpty && playIntro) {
-          if (_introController.isAnimating) {
-            _introController.stop();
-          }
-          _introController.forward(from: 0);
-        }
+      if (mounted && _viewModel.cardAssets.isNotEmpty && playIntro) {
+        if (_introController.isAnimating) _introController.stop();
+        _introController.forward(from: 0);
       }
     } catch (e) {
       debugPrint("Gallery init error: $e");
       if (mounted) {
-        setState(() => _isInitializing = false);
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -157,56 +116,6 @@ class _GalleryScreenState extends State<GalleryScreen>
           ),
         );
       }
-    } finally {
-      _isRefreshing = false;
-    }
-  }
-
-  Future<void> _loadMore() async {
-    if (_galleryService.isLoading) return;
-    await _galleryService.loadMoreImages();
-    if (!mounted) return;
-    _syncCardAssets(resetIndex: false);
-  }
-
-  void _syncCardAssets({required bool resetIndex}) {
-    final pendingIds = _pendingDeletionQueue.map((asset) => asset.id).toSet();
-    // Sort DESCENDING = newest first
-    final sorted = List<AssetEntity>.from(_galleryService.allImages)
-      ..sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
-    final filtered = sorted
-        .where((asset) => !pendingIds.contains(asset.id))
-        .toList();
-
-    setState(() {
-      _cardAssets = filtered;
-      if (_cardAssets.isEmpty) {
-        _topCardIndex = 0;
-        _cardOffset = Offset.zero;
-        _cardRotation = 0;
-        return;
-      }
-
-      if (resetIndex || _topCardIndex >= _cardAssets.length) {
-        _topCardIndex = 0; // Start at most recent (index 0)
-      } else {
-        final currentId = _cardAssets[_topCardIndex].id;
-        final newIndex = _cardAssets.indexWhere(
-          (asset) => asset.id == currentId,
-        );
-        if (newIndex == -1) {
-          _topCardIndex = 0;
-        } else {
-          _topCardIndex = newIndex;
-        }
-      }
-    });
-  }
-
-  void _maybeLoadMore() {
-    if (_cardAssets.isEmpty) return;
-    if (_topCardIndex >= _cardAssets.length - 3) {
-      _loadMore();
     }
   }
 
@@ -214,132 +123,141 @@ class _GalleryScreenState extends State<GalleryScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Update gallery grouping with localized date labels
-    if (_galleryService.allImages.isNotEmpty) {
-      _galleryService.updateGroupingWithContext(context);
+    if (_viewModel.galleryService.allImages.isNotEmpty) {
+      _viewModel.updateGroupingWithContext(context);
     }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundPrimary,
-        appBar: AppBar(
-          backgroundColor: AppColors.backgroundPrimary,
-          elevation: 0,
-          title: Text(
-            l10n.yourPhotos,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: [
-            PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_vert,
-                color: AppColors.textSecondary,
-                size: 26,
-              ),
-              offset: const Offset(0, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              itemBuilder: (BuildContext context) => [
-                PopupMenuItem<String>(
-                  value: 'settings',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.settings_outlined,
-                        size: 20,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        l10n.settings,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) {
+        return WillPopScope(
+          onWillPop: _onWillPop,
+          child: Scaffold(
+            backgroundColor: AppColors.backgroundPrimary,
+            appBar: AppBar(
+              backgroundColor: AppColors.backgroundPrimary,
+              elevation: 0,
+              title: Text(
+                l10n.yourPhotos,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
-                PopupMenuItem<String>(
-                  value: 'about',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 20,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        l10n.about,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
+              ),
+
+              actions: [
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: AppColors.textSecondary,
+                    size: 26,
                   ),
-                ),
-              ],
-              onSelected: (String value) {
-                switch (value) {
-                  case 'settings':
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                    break;
-                  case 'about':
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AboutUsScreen()),
-                    );
-                    break;
-                }
-              },
-            ),
-          ],
-        ),
-        bottomNavigationBar: _isBannerAdLoaded && _bannerAd != null
-            ? Container(
-                color: AppColors.backgroundPrimary,
-                height: _bannerAd!.size.height.toDouble(),
-                width: double.infinity,
-                child: AdWidget(ad: _bannerAd!),
-              )
-            : null,
-        body: _isInitializing
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      color: Theme.of(context).colorScheme.onSurface,
+                  offset: const Offset(0, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  itemBuilder: (BuildContext context) => [
+                    PopupMenuItem<String>(
+                      value: 'settings',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.settings_outlined,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            l10n.settings,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.loadingPhotos,
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withOpacity(0.7),
+                    PopupMenuItem<String>(
+                      value: 'about',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            l10n.about,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
+                  onSelected: (String value) {
+                    switch (value) {
+                      case 'settings':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsScreen(),
+                          ),
+                        );
+                        break;
+                      case 'about':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AboutUsScreen(),
+                          ),
+                        );
+                        break;
+                    }
+                  },
                 ),
-              )
-            : _buildGalleryOverlay(l10n),
-      ),
+              ],
+            ),
+            bottomNavigationBar: _isBannerAdLoaded && _bannerAd != null
+                ? Container(
+                    color: AppColors.backgroundPrimary,
+                    height: _bannerAd!.size.height.toDouble(),
+                    width: double.infinity,
+                    child: AdWidget(ad: _bannerAd!),
+                  )
+                : null,
+            body: _viewModel.isInitializing
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.loadingPhotos,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : _buildGalleryOverlay(l10n),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildGalleryBackground() {
-    final groupedImages = _galleryService.groupedImages;
+    final groupedImages = _viewModel.galleryService.groupedImages;
     final l10n = AppLocalizations.of(context)!;
 
     if (groupedImages.isEmpty) {
@@ -374,7 +292,8 @@ class _GalleryScreenState extends State<GalleryScreen>
       backgroundColor: AppColors.backgroundSurface,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: sectionKeys.length + (_galleryService.isLoading ? 1 : 0),
+        itemCount:
+            sectionKeys.length + (_viewModel.galleryService.isLoading ? 1 : 0),
         itemBuilder: (context, sectionIndex) {
           if (sectionIndex >= sectionKeys.length) {
             return const Padding(
@@ -473,71 +392,9 @@ class _GalleryScreenState extends State<GalleryScreen>
     );
   }
 
-  // Future<bool> _onWillPop() async {
-  //   final l10n = AppLocalizations.of(context)!;
-  //   final hasDeletedImages = _totalDeletedCount > 0;
-
-  //   final shouldExit = await showDialog<bool>(
-  //     context: context,
-  //     builder: (_) => AlertDialog(
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //       title: Text(l10n.exitGallery),
-  //       content: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           Image.asset(
-  //             hasDeletedImages
-  //                 ? 'assets/images/happy.png'
-  //                 : 'assets/images/sad.png',
-  //             height: 120,
-  //             fit: BoxFit.contain,
-  //             errorBuilder: (_, __, ___) => Icon(
-  //               hasDeletedImages ? Icons.celebration : Icons.mood_bad,
-  //               size: 80,
-  //             ),
-  //           ),
-  //           const SizedBox(height: 16),
-  //           Text(
-  //             hasDeletedImages
-  //                 ? l10n.freedUpSpace
-  //                 : l10n.exitWithoutCleaningMessage,
-  //             textAlign: TextAlign.center,
-  //           ),
-  //           if (hasDeletedImages)
-  //             Padding(
-  //               padding: const EdgeInsets.only(top: 8),
-  //               child: Text(
-  //                 l10n.filesDeleted(
-  //                   _totalDeletedCount,
-  //                   _totalDeletedCount > 1 ? 's' : '',
-  //                 ),
-  //                 style: TextStyle(
-  //                   fontSize: 14,
-  //                   fontWeight: FontWeight.w600,
-  //                   color: Theme.of(context).colorScheme.primary,
-  //                 ),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //             ),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context, false),
-  //           child: Text(l10n.cancel),
-  //         ),
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context, true),
-  //           child: Text(l10n.exit, style: const TextStyle(color: Colors.red)),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  //   return shouldExit ?? false;
-  // }
   Future<bool> _onWillPop() async {
     final l10n = AppLocalizations.of(context)!;
-    final hasDeletedImages = _totalDeletedCount > 0;
+    final hasDeletedImages = _viewModel.totalDeletedCount > 0;
 
     final shouldExit = await showDialog<bool>(
       context: context,
@@ -570,8 +427,8 @@ class _GalleryScreenState extends State<GalleryScreen>
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   l10n.filesDeleted(
-                    _totalDeletedCount,
-                    _totalDeletedCount > 1 ? 's' : '',
+                    _viewModel.totalDeletedCount,
+                    _viewModel.totalDeletedCount > 1 ? 's' : '',
                   ),
                   style: TextStyle(
                     fontSize: 14,
@@ -597,7 +454,6 @@ class _GalleryScreenState extends State<GalleryScreen>
     );
 
     if (shouldExit == true) {
-      // Closes the app properly (avoids black screen)
       Future.delayed(const Duration(milliseconds: 200), () {
         Navigator.pop(context);
       });
@@ -628,7 +484,7 @@ class _GalleryScreenState extends State<GalleryScreen>
         height: stackHeight + 280,
         child: Stack(
           clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter, // 👈 Changed to bottom
+          alignment: Alignment.bottomCenter,
           children: [
             Positioned(top: 20, child: _buildBinButton(l10n)),
             Positioned(
@@ -645,7 +501,7 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Widget _buildBinButton(AppLocalizations l10n) {
-    final pendingCount = _pendingDeletionQueue.length;
+    final pendingCount = _viewModel.pendingCount;
     final isEmpty = pendingCount == 0;
 
     return Column(
@@ -747,14 +603,17 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Widget _buildCardDeck(AppLocalizations l10n, double width, double height) {
-    if (_cardAssets.isEmpty) {
-      if (_pendingDeletionQueue.isNotEmpty) {
+    final cardAssets = _viewModel.cardAssets;
+    final topCardIndex = _viewModel.topCardIndex;
+
+    if (cardAssets.isEmpty) {
+      if (_viewModel.pendingCount > 0) {
         return Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${_pendingDeletionQueue.length} ${l10n.selectedCount}',
+                '${_viewModel.pendingCount} ${l10n.selectedCount}',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18,
@@ -787,22 +646,23 @@ class _GalleryScreenState extends State<GalleryScreen>
       );
     }
 
-    // Show 3 cards stacked upward from bottom
-    final depth = 3;
+    const depth = 3;
     final widgets = <Widget>[];
-    final maxDepth = math.min(depth, _cardAssets.length - _topCardIndex);
+    final maxDepth = math.min(depth, cardAssets.length - topCardIndex);
 
     for (int i = 0; i < maxDepth; i++) {
-      final cardIndex = _topCardIndex + i;
-      if (cardIndex >= _cardAssets.length) continue;
-      final asset = _cardAssets[cardIndex];
-      final depthIndex = i;
-      final isTop = depthIndex == maxDepth - 1;
+      final cardIndex = topCardIndex + i;
+      if (cardIndex >= cardAssets.length) continue;
 
-      // Cards rise upward from the bottom
-      final verticalOffset = depthIndex * 20.0;
-      final scale = 1 - (maxDepth - 1 - depthIndex) * 0.04;
-      final horizontalPadding = (maxDepth - 1 - depthIndex) * 4.0;
+      final asset = cardAssets[cardIndex];
+      final depthIndex = i;
+      // Top card is the first one (at topCardIndex), not the last
+      final isTop = depthIndex == 0;
+
+      // Reverse the order: top card (depthIndex=0) should be on top visually
+      final verticalOffset = (maxDepth - 1 - depthIndex) * 20.0;
+      final scale = 1 - depthIndex * 0.04;
+      final horizontalPadding = depthIndex * 4.0;
 
       widgets.add(
         Positioned(
@@ -829,7 +689,7 @@ class _GalleryScreenState extends State<GalleryScreen>
                 borderRadius: BorderRadius.circular(15),
                 child: isTop
                     ? _buildInteractiveCard(asset, width, height)
-                    : _buildStaticCard(asset, width, height),
+                    : _buildStaticCard(asset),
               ),
             ),
           ),
@@ -837,39 +697,66 @@ class _GalleryScreenState extends State<GalleryScreen>
       );
     }
 
+    // Reverse widgets so the top card (at topCardIndex) is drawn last and appears on top
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
-      children: widgets,
+      children: widgets.reversed.toList(),
     );
   }
 
   Widget _buildInteractiveCard(AssetEntity asset, double width, double height) {
-    final introRaw = _hasPlayedIntro ? 1.0 : _introController.value;
-    final introProgress = _hasPlayedIntro
+    final introRaw = _viewModel.hasPlayedIntro ? 1.0 : _introController.value;
+    final introProgress = _viewModel.hasPlayedIntro
         ? 1.0
         : Curves.easeOutCubic.transform(introRaw);
 
     final initialOffset = Offset(-width * 0.32, -height * 0.55);
 
     final offset =
-        _cardOffset +
+        _viewModel.cardOffset +
         Offset(
           initialOffset.dx * (1 - introProgress),
           initialOffset.dy * (1 - introProgress),
         );
-    final introScale = _hasPlayedIntro ? 1.0 : (0.65 + introProgress * 0.35);
-    final introRotation = _hasPlayedIntro ? 0.0 : (1 - introProgress) * -0.08;
+    final introScale = _viewModel.hasPlayedIntro
+        ? 1.0
+        : (0.65 + introProgress * 0.35);
+    final introRotation = _viewModel.hasPlayedIntro
+        ? 0.0
+        : (1 - introProgress) * -0.08;
 
     return AbsorbPointer(
-      absorbing: !_hasPlayedIntro,
+      absorbing: !_viewModel.hasPlayedIntro,
       child: GestureDetector(
-        onPanUpdate: _onCardPanUpdate,
-        onPanEnd: _onCardPanEnd,
+        onPanUpdate: (details) => _viewModel.onCardPanUpdate(
+          details,
+          MediaQuery.of(context).size.width,
+        ),
+        onPanEnd: (details) {
+          final message = _viewModel.onCardPanEnd(details);
+          if (message != null) {
+            final l10n = AppLocalizations.of(context)!;
+            String snackMessage;
+
+            switch (message) {
+              case 'noMoreCards':
+                snackMessage = l10n.noMoreCards;
+                break;
+              case 'alreadyAtMostRecent':
+                snackMessage = 'Already at most recent photo';
+                break;
+              default:
+                snackMessage = message;
+            }
+
+            _showSnack(snackMessage);
+          }
+        },
         child: Transform.translate(
           offset: offset,
           child: Transform.rotate(
-            angle: _cardRotation + introRotation,
+            angle: _viewModel.cardRotation + introRotation,
             child: Transform.scale(
               scale: introScale,
               child: Container(
@@ -893,7 +780,7 @@ class _GalleryScreenState extends State<GalleryScreen>
     );
   }
 
-  Widget _buildStaticCard(AssetEntity asset, double width, double height) {
+  Widget _buildStaticCard(AssetEntity asset) {
     return _buildCardSurface(asset);
   }
 
@@ -924,7 +811,6 @@ class _GalleryScreenState extends State<GalleryScreen>
               ),
             ),
           ),
-
           if (asset.type == AssetType.video)
             Center(
               child: Container(
@@ -950,173 +836,204 @@ class _GalleryScreenState extends State<GalleryScreen>
     );
   }
 
-  void _onCardPanUpdate(DragUpdateDetails details) {
-    setState(() {
-      _cardOffset += details.delta;
-      final width = MediaQuery.of(context).size.width;
-      _cardRotation = (_cardOffset.dx / width) * 0.4;
-    });
-  }
-
-  void _onCardPanEnd(DragEndDetails details) {
-    const horizontalThreshold = 120;
-    const verticalThreshold = 120;
-    final dx = _cardOffset.dx;
-    final dy = _cardOffset.dy;
-
-    if (dy < -verticalThreshold) {
-      _handleSwipe(_SwipeDirection.up);
-    } else if (dx > horizontalThreshold) {
-      _handleSwipe(_SwipeDirection.right);
-    } else if (dx < -horizontalThreshold) {
-      _handleSwipe(_SwipeDirection.left);
-    } else {
-      _resetCardPosition();
-    }
-  }
-
-  void _handleSwipe(_SwipeDirection direction) {
-    if (_cardAssets.isEmpty) {
-      _resetCardPosition();
-      return;
-    }
-
-    final l10n = AppLocalizations.of(context)!;
-    switch (direction) {
-      case _SwipeDirection.left:
-        // Swipe left = go to OLDER photos (increase index)
-        if (_topCardIndex < _cardAssets.length - 1) {
-          setState(() {
-            _topCardIndex++;
-            _cardOffset = Offset.zero;
-            _cardRotation = 0.0;
-          });
-          _maybeLoadMore();
-        } else {
-          _showSnack(l10n.noMoreCards);
-          _resetCardPosition();
-        }
-        break;
-
-      case _SwipeDirection.right:
-        // Swipe right = go to NEWER photos (decrease index)
-        if (_topCardIndex > 0) {
-          setState(() {
-            _topCardIndex--;
-            _cardOffset = Offset.zero;
-            _cardRotation = 0.0;
-          });
-        } else {
-          // Already at the most recent photo (index 0)
-          _showSnack('Already at most recent photo');
-          _resetCardPosition();
-        }
-        break;
-
-      case _SwipeDirection.up:
-        final asset = _cardAssets[_topCardIndex];
-        if (!_pendingDeletionQueue.any((item) => item.id == asset.id)) {
-          _pendingDeletionQueue.add(asset);
-        }
-        setState(() {
-          _cardAssets.removeAt(_topCardIndex);
-          if (_topCardIndex >= _cardAssets.length && _cardAssets.isNotEmpty) {
-            _topCardIndex = _cardAssets.length - 1;
-          }
-          _cardOffset = Offset.zero;
-          _cardRotation = 0.0;
-        });
-        _maybeLoadMore();
-        break;
-    }
-  }
-
-  void _resetCardPosition() {
-    setState(() {
-      _cardOffset = Offset.zero;
-      _cardRotation = 0.0;
-    });
-  }
-
   Future<void> _onBinPressed() async {
+    if (!mounted) return;
+
     final l10n = AppLocalizations.of(context)!;
-    if (_pendingDeletionQueue.isEmpty) {
+
+    if (_viewModel.pendingCount == 0) {
       _showSnack(l10n.queueEmpty);
       return;
     }
 
-    final count = _pendingDeletionQueue.length;
+    // Create a safe copy of the queue before showing dialog
+    final queueCopy = List<AssetEntity>.from(_viewModel.pendingDeletionQueue);
+    final count = queueCopy.length;
     final plural = count > 1 ? 's' : '';
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.confirmDelete(count, plural)),
-        content: Text(l10n.permanentDeleteConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) {
+    // Show simplified confirmation dialog to avoid viewport rendering issues
+    bool? confirmed;
+    try {
+      confirmed = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(l10n.confirmDelete(count, plural)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.permanentDeleteConfirmation),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.confirm),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('Error showing delete confirmation dialog: $e');
+      debugPrint('Stack trace: $stackTrace');
+      if (mounted) {
+        _showSnack('Error: Could not show confirmation dialog');
+      }
       return;
     }
 
+    if (confirmed != true || !mounted) return;
+
+    // Small delay to ensure dialog is fully closed and UI is stable
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (!mounted) return;
+
+    // Perform deletion
     await _deleteQueuedAssets();
   }
 
   Future<void> _deleteQueuedAssets() async {
-    if (_pendingDeletionQueue.isEmpty) return;
-    final ids = _pendingDeletionQueue.map((asset) => asset.id).toList();
-    final deleteCount = ids.length;
+    if (!mounted) return;
+
+    // Show loading indicator with proper constraints
     try {
-      await PhotoManager.editor.deleteWithIds(ids);
-      await PhotoManager.clearFileCache();
-      // Update total deleted count
-      _totalDeletedCount += deleteCount;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => Material(
+          type: MaterialType.transparency,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+      );
     } catch (e) {
-      debugPrint('Error deleting assets: $e');
+      debugPrint('Error showing loading dialog: $e');
+      // Continue with deletion even if loading dialog fails
     }
 
-    _pendingDeletionQueue.clear();
-    // Don't play intro animation after deletion
-    await _initGallery(playIntro: false);
-    if (!mounted) return;
-    await _showFireworksOverlay();
+    try {
+      // Small delay to ensure loading dialog is shown and UI is stable
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      if (!mounted) {
+        try {
+          Navigator.of(context).pop(); // Close loading dialog
+        } catch (e) {
+          debugPrint('Error closing loading dialog: $e');
+        }
+        return;
+      }
+
+      final result = await _viewModel.deleteQueuedAssets();
+
+      // Close loading indicator safely
+      if (mounted) {
+        try {
+          Navigator.of(context).pop();
+        } catch (e) {
+          debugPrint('Error closing loading dialog after deletion: $e');
+        }
+      }
+
+      if (!mounted) return;
+
+      if (!result['success']) {
+        final message = result['message'];
+        String snackMessage;
+
+        if (message == 'queueEmpty') {
+          snackMessage = AppLocalizations.of(context)!.queueEmpty;
+        } else if (message == 'deletionCancelled') {
+          snackMessage = 'Deletion cancelled or failed';
+        } else {
+          snackMessage = 'Error: ${result['error'] ?? 'Unknown error'}';
+        }
+
+        _showSnack(snackMessage);
+        return;
+      }
+
+      // Show success message briefly
+      final deletedCount = result['deleted'] ?? 0;
+      if (result['partial'] == true) {
+        _showSnack('Deleted ${result['deleted']} of ${result['total']} files');
+      } else if (deletedCount > 0) {
+        _showSnack(
+          'Successfully deleted $deletedCount file${deletedCount > 1 ? 's' : ''}',
+        );
+      }
+
+      // Show fireworks animation after successful deletion
+      if (result['success'] == true && mounted) {
+        // Small delay to let the UI update
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (mounted) {
+          try {
+            await _showFireworksOverlay();
+          } catch (e) {
+            debugPrint('Error showing fireworks: $e');
+            // Don't show error to user, just log it
+          }
+        }
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error in _deleteQueuedAssets: $e');
+      debugPrint('Stack trace: $stackTrace');
+
+      // Close loading indicator if still open
+      if (mounted) {
+        try {
+          Navigator.of(context).pop();
+        } catch (e2) {
+          debugPrint('Error closing loading dialog on error: $e2');
+        }
+        _showSnack('Error deleting files: ${e.toString()}');
+      }
+    }
   }
 
   Future<void> _showFireworksOverlay() async {
+    if (!mounted) return;
+
     return showGeneralDialog<void>(
       context: context,
       barrierDismissible: false,
       barrierLabel: 'fireworks',
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            final scale = Curves.easeOutBack.transform(animation.value);
-            final opacity = Curves.easeIn.transform(animation.value);
-            return Opacity(
-              opacity: opacity,
-              child: Transform.scale(scale: scale, child: child),
-            );
-          },
-          child: const Center(
-            child: SizedBox(
-              width: 280,
-              height: 280,
-              child: _FireworksCelebration(),
+        return Material(
+          type: MaterialType.transparency,
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              final scale = Curves.easeOutBack.transform(animation.value);
+              final opacity = Curves.easeIn.transform(animation.value);
+              return Opacity(
+                opacity: opacity,
+                child: Transform.scale(scale: scale, child: child),
+              );
+            },
+            child: const Center(
+              child: SizedBox(
+                width: 280,
+                height: 280,
+                child: _FireworksCelebration(),
+              ),
             ),
           ),
         );
@@ -1137,7 +1054,6 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Future<void> _refreshGallery() async {
-    // Don't replay intro on manual refresh
     await _initGallery(playIntro: false);
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
@@ -1156,6 +1072,7 @@ class _GalleryScreenState extends State<GalleryScreen>
     WidgetsBinding.instance.removeObserver(this);
     _bannerAd?.dispose();
     _introController.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 }
@@ -1194,17 +1111,23 @@ class _FireworksCelebrationState extends State<_FireworksCelebration>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 280,
-      height: 280,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return CustomPaint(
-            painter: _FireworksPainter(progress: _controller.value),
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = math.min(constraints.maxWidth, constraints.maxHeight);
+        return SizedBox(
+          width: size,
+          height: size,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(size, size),
+                painter: _FireworksPainter(progress: _controller.value),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
